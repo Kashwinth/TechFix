@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="tech_bg_dark">#121212</color> <!-- Deep Charcoal -->
+    <color name="tech_surface">#1E1E1E</color> <!-- Lighter Card Color -->
+    <color name="tech_accent">#00E5FF</color> <!-- Electric Cyan -->
+    <color name="tech_text_primary">#FFFFFF</color>
+    <color name="tech_text_secondary">#B3B3B3</color>
+</resources>
