@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="24dp"
-    android:background="#F5F5F5">
+    android:background="@drawable/bg_tech_gradient">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -21,8 +21,8 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="8dp">
+                app:cardCornerRadius="8dp"
+                app:cardElevation="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -36,7 +36,7 @@
                         android:text="Join TechFix"
                         android:textSize="28sp"
                         android:textStyle="bold"
-                        android:textColor="#2196F3"
+                        android:textColor="@color/tech_accent"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginBottom="4dp"/>
 
@@ -45,7 +45,7 @@
                         android:layout_height="wrap_content"
                         android:text="Create an account to get started"
                         android:textSize="14sp"
-                        android:textColor="#757575"
+                        android:textColor="@color/tech_text_secondary"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginBottom="24dp"/>
 
@@ -89,46 +89,14 @@
                             android:inputType="textPassword" />
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Select Role"
-                        android:textStyle="bold"
-                        android:textSize="14sp"
-                        android:textColor="#757575"
-                        android:layout_marginBottom="8dp"/>
-
-                    <RadioGroup
-                        android:id="@+id/rgRole"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="24dp">
-
-                        <RadioButton
-                            android:id="@+id/rbCustomer"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Customer"
-                            android:checked="true"/>
-
-                        <RadioButton
-                            android:id="@+id/rbAdmin"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Management"/>
-                    </RadioGroup>
-
                     <Button
                         android:id="@+id/btnRegister"
                         android:layout_width="match_parent"
                         android:layout_height="56dp"
                         android:text="Register"
                         android:textSize="16sp"
-                        android:backgroundTint="#2196F3"
-                        android:textColor="#FFFFFF"
+                        android:backgroundTint="@color/tech_button_tint"
+                        android:textColor="@color/tech_white"
                         android:layout_marginBottom="16dp"/>
 
                     <TextView
@@ -136,7 +104,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Already have an account? Login"
-                        android:textColor="#2196F3"
+                        android:textColor="@color/tech_accent"
                         android:textSize="14sp"
                         android:layout_gravity="center_horizontal"
                         android:clickable="true"

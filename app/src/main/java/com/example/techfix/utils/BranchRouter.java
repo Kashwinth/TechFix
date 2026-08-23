@@ -3,74 +3,44 @@ package com.example.techfix.utils;
 import android.content.Context;
 import com.example.techfix.database.DatabaseHelper;
 import com.example.techfix.models.Branch;
-import java.util.List;
+import java.util.*;
 
 public class BranchRouter {
+    public static class RouteResult {
+        public Branch nearest;
+        public Branch eligible;
+        public Branch fallback;
+        public String requiredPart;
+        public String reason;
+    }
 
-    /**
-     * Finds the nearest branch that has stock of the required spare part for the device category.
-     * Uses the Haversine formula to calculate the distance between the user and branch locations.
-     */
-    public static Branch routeToNearestAvailableBranch(Context context, String deviceCategory, double userLat, double userLng) {
-        DatabaseHelper dbHelper = new DatabaseHelper(context);
-        List<Branch> branches = dbHelper.getAllBranches();
-
-        // Map device category to specific required spare part
-        String requiredPartName;
-        if ("Mobile".equalsIgnoreCase(deviceCategory)) {
-            requiredPartName = "Mobile Screen";
-        } else if ("Laptop".equalsIgnoreCase(deviceCategory)) {
-            requiredPartName = "Laptop Keyboard";
-        } else {
-            requiredPartName = "Mobile Screen"; // Default fallback
-        }
-
-        Branch bestBranch = null;
-        double minDistance = Double.MAX_VALUE;
-
-        // Try to find the closest branch with stock > 0
+    public static RouteResult evaluate(Context context, String category, double userLat, double userLng) {
+        DatabaseHelper db = new DatabaseHelper(context);
+        List<Branch> branches = db.getAllBranches();
+        String part = requiredPart(category);
+        branches.sort(Comparator.comparingDouble(b -> distance(userLat, userLng, b.getLatitude(), b.getLongitude())));
+        RouteResult result = new RouteResult(); result.requiredPart = part;
+        if (branches.isEmpty()) return result;
+        result.nearest = branches.get(0);
         for (Branch branch : branches) {
-            int stock = dbHelper.getSparePartStock(branch.getId(), requiredPartName);
-            if (stock > 0) {
-                double distance = calculateDistance(userLat, userLng, branch.getLatitude(), branch.getLongitude());
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    bestBranch = branch;
-                }
-            }
+            boolean hasTech = !db.getActiveTechnicians(branch.getId()).isEmpty();
+            boolean hasPart = db.getSparePartStock(branch.getId(), part) > 0;
+            if (hasTech && hasPart) { result.eligible = branch; break; }
         }
-
-        // If no branch has stock, fallback to the nearest branch regardless of stock
-        if (bestBranch == null && !branches.isEmpty()) {
-            minDistance = Double.MAX_VALUE;
-            for (Branch branch : branches) {
-                double distance = calculateDistance(userLat, userLng, branch.getLatitude(), branch.getLongitude());
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    bestBranch = branch;
-                }
-            }
+        if (result.eligible != null && result.nearest != result.eligible) {
+            result.fallback = result.eligible;
+            boolean tech = !db.getActiveTechnicians(result.nearest.getId()).isEmpty();
+            boolean stock = db.getSparePartStock(result.nearest.getId(), part) > 0;
+            result.reason = !tech && !stock ? "technician availability and the required spare part: " + part + "" : (!tech ? "technician availability" : "the required spare part: " + part + "");
         }
-
-        // Ultimate fallback to first branch if everything else is empty
-        if (bestBranch == null && !branches.isEmpty()) {
-            bestBranch = branches.get(0);
-        }
-
-        return bestBranch;
+        db.close(); return result;
     }
 
-    /**
-     * Calculates the distance between two points in kilometers using the Haversine formula.
-     */
-    private static double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
-        final int R = 6371; // Radius of the earth in km
-        double latDistance = Math.toRadians(lat2 - lat1);
-        double lonDistance = Math.toRadians(lon2 - lon1);
-        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
-                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
-                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c; // distance in km
+    public static String requiredPart(String category) {
+        if ("Mobile".equalsIgnoreCase(category)) return "Mobile Screen";
+        if ("Laptop".equalsIgnoreCase(category)) return "Laptop Keyboard";
+        return "Mobile Screen";
     }
+    public static double distance(double lat1,double lon1,double lat2,double lon2){double r=6371, a=Math.sin(Math.toRadians(lat2-lat1)/2)*Math.sin(Math.toRadians(lat2-lat1)/2)+Math.cos(Math.toRadians(lat1))*Math.cos(Math.toRadians(lat2))*Math.sin(Math.toRadians(lon2-lon1)/2)*Math.sin(Math.toRadians(lon2-lon1)/2);return r*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
+    public static Branch routeToNearestAvailableBranch(Context context,String category,double lat,double lng){RouteResult r=evaluate(context,category,lat,lng);return r.eligible!=null?r.eligible:r.nearest;}
 }

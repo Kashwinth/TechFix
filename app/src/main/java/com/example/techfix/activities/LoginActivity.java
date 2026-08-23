@@ -16,6 +16,8 @@ import com.google.android.material.textfield.TextInputEditText;
 
 public class LoginActivity extends AppCompatActivity {
 
+    public static final String EXTRA_RETURN_TO_TRACK = "return_to_track";
+
     private TextInputEditText etEmail, etPassword;
     private Button btnLogin;
     private TextView tvRegisterLink;
@@ -27,10 +29,13 @@ public class LoginActivity extends AppCompatActivity {
 
         // Check if already logged in
         SharedPreferences prefs = getSharedPreferences("TechFixPrefs", Context.MODE_PRIVATE);
+        boolean returnToTrack = getIntent().getBooleanExtra(EXTRA_RETURN_TO_TRACK, false);
         if (prefs.getBoolean("isLoggedIn", false)) {
             String role = prefs.getString("userRole", "customer");
-            if ("admin".equalsIgnoreCase(role)) {
+            if ("manager".equalsIgnoreCase(role) || "admin".equalsIgnoreCase(role) || "staff".equalsIgnoreCase(role)) {
                 startActivity(new Intent(LoginActivity.this, AdminDashboardActivity.class));
+            } else if (returnToTrack) {
+                startActivity(new Intent(LoginActivity.this, RepairHistoryActivity.class));
             } else {
                 startActivity(new Intent(LoginActivity.this, CustomerDashboardActivity.class));
             }
@@ -56,32 +61,46 @@ public class LoginActivity extends AppCompatActivity {
                 return;
             }
 
-            // Run database call on a background thread for best practices
+            // Run database work outside the UI thread and recover from SQLite errors.
+            btnLogin.setEnabled(false);
             new Thread(() -> {
-                User user = dbHelper.authenticateUser(email, password);
-                runOnUiThread(() -> {
-                    if (user != null) {
-                        // Save login state in SharedPreferences
-                        SharedPreferences.Editor editor = prefs.edit();
-                        editor.putBoolean("isLoggedIn", true);
-                        editor.putInt("userId", user.getId());
-                        editor.putString("userName", user.getName());
-                        editor.putString("userEmail", user.getEmail());
-                        editor.putString("userRole", user.getRole());
-                        editor.apply();
+                try {
+                    User user = dbHelper.authenticateUser(email, password);
+                    runOnUiThread(() -> {
+                        btnLogin.setEnabled(true);
+                        if (user != null) {
+                            SharedPreferences.Editor editor = prefs.edit();
+                            editor.putBoolean("isLoggedIn", true);
+                            editor.putInt("userId", user.getId());
+                            editor.putString("userName", user.getName());
+                            editor.putString("userEmail", user.getEmail());
+                            editor.putString("userRole", user.getRole());
+                            editor.apply();
 
-                        Toast.makeText(LoginActivity.this, "Login Successful! Welcome " + user.getName(), Toast.LENGTH_SHORT).show();
-
-                        if ("admin".equalsIgnoreCase(user.getRole())) {
-                            startActivity(new Intent(LoginActivity.this, AdminDashboardActivity.class));
+                            Toast.makeText(LoginActivity.this,
+                                    "Login Successful! Welcome " + user.getName(), Toast.LENGTH_SHORT).show();
+                            Intent destination;
+                            if ("manager".equalsIgnoreCase(user.getRole()) || "admin".equalsIgnoreCase(user.getRole()) || "staff".equalsIgnoreCase(user.getRole())) {
+                                destination = new Intent(this, AdminDashboardActivity.class);
+                            } else if (returnToTrack) {
+                                destination = new Intent(this, RepairHistoryActivity.class);
+                            } else {
+                                destination = new Intent(this, CustomerDashboardActivity.class);
+                            }
+                            startActivity(destination);
+                            finish();
                         } else {
-                            startActivity(new Intent(LoginActivity.this, CustomerDashboardActivity.class));
+                            Toast.makeText(this, "Invalid email or password", Toast.LENGTH_SHORT).show();
                         }
-                        finish();
-                    } else {
-                        Toast.makeText(LoginActivity.this, "Invalid email or password", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                    });
+                } catch (Exception exception) {
+                    android.util.Log.e("LoginActivity", "Authentication failed", exception);
+                    runOnUiThread(() -> {
+                        btnLogin.setEnabled(true);
+                        Toast.makeText(this,
+                                "Unable to log in. Please try again.", Toast.LENGTH_LONG).show();
+                    });
+                }
             }).start();
         });
 

@@ -1,8 +1,26 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="tech_bg_dark">#121212</color> <!-- Deep Charcoal -->
-    <color name="tech_surface">#1E1E1E</color> <!-- Lighter Card Color -->
-    <color name="tech_accent">#00E5FF</color> <!-- Electric Cyan -->
-    <color name="tech_text_primary">#FFFFFF</color>
-    <color name="tech_text_secondary">#B3B3B3</color>
+    <color name="tech_bg">#121212</color>
+    <color name="tech_surface">#1E1E1E</color>
+    <color name="tech_primary">#1B9AAA</color>
+    <color name="tech_accent">#5FD4E3</color>
+    <color name="tech_text_main">#FFFFFF</color>
+    <color name="tech_text_sub">#B3B3B3</color>
+    <color name="tech_success">#6FCF97</color>
+    <color name="tech_warning">#E0A93B</color>
+
+    <!-- Compatibility tokens used by the remaining screens. -->
+    <color name="tech_bg_dark">@color/tech_bg</color>
+    <color name="tech_bg_deep">@color/tech_bg</color>
+    <color name="tech_surface_high">@color/tech_surface</color>
+    <color name="tech_field">@color/tech_surface</color>
+    <color name="tech_accent_bright">@color/tech_accent</color>
+    <color name="tech_text_primary">@color/tech_text_main</color>
+    <color name="tech_text_secondary">@color/tech_text_sub</color>
+    <color name="tech_outline">#265FD4E3</color>
+    <color name="tech_outline_strong">@color/tech_accent</color>
+    <color name="tech_disabled">@color/tech_text_sub</color>
+    <color name="tech_status_pending">@color/tech_primary</color>
+    <color name="tech_status_progress">@color/tech_primary</color>
+    <color name="tech_status_complete">@color/tech_success</color>
+    <color name="tech_white">@color/tech_text_main</color>
 </resources>

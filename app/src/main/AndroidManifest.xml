@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -11,29 +15,56 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.TechFix">
+
+        <!-- The Launcher Activity (Your Homepage) -->
         <activity
             android:name=".activities.HomeActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".activities.RepairRequestActivity"
-            android:exported="false" />
+
+        <!-- Authentication Activities -->
         <activity
             android:name=".activities.LoginActivity"
             android:exported="false" />
         <activity
             android:name=".activities.RegisterActivity"
             android:exported="false" />
+
+        <!-- Dashboard Activities -->
+        <activity
+            android:name=".activities.CustomerDashboardActivity"
+            android:exported="false" />
         <activity
             android:name=".activities.AdminDashboardActivity"
             android:exported="false" />
+
         <activity
-            android:name=".MainActivity"
+            android:name=".activities.ManageStaffActivity"
             android:exported="false" />
+
+        <!-- Customer Feature Activities -->
+        <activity
+            android:name=".activities.RepairRequestActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.RepairHistoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.ServicesActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.BranchesActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.GalleryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.ProfileActivity"
+            android:exported="false" />
+
     </application>
 </manifest>

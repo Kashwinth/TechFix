@@ -1,7 +1,22 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+<resources>
     <style name="Base.Theme.TechFix" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <item name="colorPrimary">@color/tech_accent</item>
+        <item name="colorOnPrimary">@color/tech_white</item>
+        <item name="colorSecondary">@color/tech_accent</item>
+        <item name="colorOnSecondary">@color/tech_white</item>
+        <item name="colorSurface">@color/tech_surface</item>
+        <item name="colorOnSurface">@color/tech_text_primary</item>
+        <item name="colorSurfaceVariant">@color/tech_surface_high</item>
+        <item name="colorOnSurfaceVariant">@color/tech_text_secondary</item>
+        <item name="colorOutline">@color/tech_outline_strong</item>
+        <item name="android:colorAccent">@color/tech_accent</item>
+        <item name="android:statusBarColor">@color/tech_bg_deep</item>
+        <item name="android:navigationBarColor">@color/tech_bg_deep</item>
+        <item name="android:windowBackground">@color/tech_bg_dark</item>
+        <item name="android:fontFamily">sans</item>
+        <item name="fontFamily">sans</item>
+        <item name="materialButtonStyle">@style/Widget.TechFix.Button</item>
+        <item name="textInputStyle">@style/Widget.TechFix.TextInputLayout</item>
+        <item name="materialCardViewStyle">@style/Widget.TechFix.Card</item>
     </style>
 </resources>

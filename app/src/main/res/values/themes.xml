@@ -1,9 +1,53 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+<resources>
     <style name="Base.Theme.TechFix" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">@color/tech_accent</item>
+        <item name="colorOnPrimary">@color/tech_white</item>
+        <item name="colorSecondary">@color/tech_accent</item>
+        <item name="colorOnSecondary">@color/tech_white</item>
+        <item name="colorSurface">@color/tech_surface</item>
+        <item name="colorOnSurface">@color/tech_text_primary</item>
+        <item name="colorSurfaceVariant">@color/tech_surface_high</item>
+        <item name="colorOnSurfaceVariant">@color/tech_text_secondary</item>
+        <item name="colorOutline">@color/tech_outline_strong</item>
+        <item name="android:colorAccent">@color/tech_accent</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:statusBarColor">@color/tech_bg_deep</item>
+        <item name="android:navigationBarColor">@color/tech_bg_deep</item>
+        <item name="android:windowBackground">@color/tech_bg_dark</item>
+        <item name="android:fontFamily">sans</item>
+        <item name="fontFamily">sans</item>
+        <item name="materialButtonStyle">@style/Widget.TechFix.Button</item>
+        <item name="textInputStyle">@style/Widget.TechFix.TextInputLayout</item>
+        <item name="materialCardViewStyle">@style/Widget.TechFix.Card</item>
     </style>
 
     <style name="Theme.TechFix" parent="Base.Theme.TechFix" />
+
+    <style name="Widget.TechFix.Button" parent="Widget.Material3.Button">
+        <item name="android:backgroundTint">@color/tech_button_tint</item>
+        <item name="backgroundTint">@color/tech_button_tint</item>
+        <item name="android:textColor">@color/tech_white</item>
+        <item name="cornerRadius">6dp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.04</item>
+        <item name="android:elevation">0dp</item>
+    </style>
+
+    <style name="Widget.TechFix.Card" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardBackgroundColor">@color/tech_surface</item>
+        <item name="cardElevation">0dp</item>
+        <item name="strokeColor">@color/tech_outline</item>
+        <item name="strokeWidth">1dp</item>
+    </style>
+
+    <style name="Widget.TechFix.TextInputLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxBackgroundColor">@color/tech_surface_high</item>
+        <item name="boxStrokeColor">@color/tech_accent</item>
+        <item name="hintTextColor">@color/tech_text_secondary</item>
+        <item name="android:textColorHint">@color/tech_text_secondary</item>
+        <item name="boxCornerRadiusTopStart">6dp</item>
+        <item name="boxCornerRadiusTopEnd">6dp</item>
+        <item name="boxCornerRadiusBottomStart">6dp</item>
+        <item name="boxCornerRadiusBottomEnd">6dp</item>
+    </style>
 </resources>

@@ -12,7 +12,7 @@
         android:text="TechFix Secure Checkout"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:textColor="#2196F3"
+        android:textColor="@color/tech_accent"
         android:layout_marginBottom="4dp"/>
 
     <TextView
@@ -20,7 +20,7 @@
         android:layout_height="wrap_content"
         android:text="Simulated Payment Gateway"
         android:textSize="12sp"
-        android:textColor="#757575"
+        android:textColor="@color/tech_text_secondary"
         android:layout_marginBottom="24dp"/>
 
     <TextView
@@ -29,7 +29,7 @@
         android:text="Amount Due: Rs. 4,500.00"
         android:textSize="16sp"
         android:textStyle="bold"
-        android:textColor="#333333"
+        android:textColor="@color/tech_field"
         android:layout_marginBottom="16dp"/>
 
     <!-- Card Number -->
@@ -91,7 +91,7 @@
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:text="Pay Rs. 4,500.00"
-        android:backgroundTint="#4CAF50"
-        android:textColor="#FFFFFF"/>
+        android:backgroundTint="@color/tech_button_tint"
+        android:textColor="@color/tech_white"/>
 
 </LinearLayout>

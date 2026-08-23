@@ -1,3 +1,34 @@
 <resources>
     <string name="app_name">TechFix</string>
+    <string name="logout">Logout</string>
+    <string name="welcome_customer">Welcome, Customer!</string>
+    <string name="current_repair_status">Current Repair Status</string>
+    <string name="asus_tuf_gaming_a15_screen_replacement">ASUS TUF Gaming A15 - Screen Replacement</string>
+    <string name="status_assigned_to_colombo_branch_in_progress">Status: Assigned to Colombo Branch (In Progress)</string>
+    <string name="book_repair">Book Repair</string>
+    <string name="services_amp_pricing"><![CDATA[Services & Pricing]]></string>
+    <string name="branches_amp_techs"><![CDATA[Branches & Techs]]></string>
+    <string name="my_history">My History</string>
+    <string name="bookrepairlogo">➕</string>
+    <string name="myhistorylogo">📋</string>
+    <string name="serviceslogo">💻</string>
+    <string name="locationlogo">📍</string>
+    <string name="book_a_repair">Book a Repair</string>
+    <string name="device_category">Device Category</string>
+    <string name="device_model_e_g_iphone_13_asus_tuf">Device Model (e.g. iPhone 13, ASUS TUF)</string>
+    <string name="colombo_branch_name">Colombo Branch</string>
+    <string name="colombo_branch_address">Majestic City, 10 Station Road, Colombo 00400</string>
+    <string name="galle_branch_name">Galle Branch</string>
+    <string name="galle_branch_address">Galle Fort Clock Tower, Fort, Galle 80000</string>
+    <string-array name="device_categories">
+        <item>Laptop / Desktop</item>
+        <item>Mobile Phone</item>
+        <item>Tablet</item>
+        <item>Other Peripherals</item>
+    </string-array>
+
+    <string-array name="branch_locations">
+        <item>Colombo Branch</item>
+        <item>Galle Branch</item>
+    </string-array>
 </resources>

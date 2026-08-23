@@ -1,141 +1,45 @@
 package com.example.techfix.activities;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.core.app.ActivityCompat;
 import com.example.techfix.R;
-import com.example.techfix.adapters.AppointmentAdapter;
 import com.example.techfix.database.DatabaseHelper;
 import com.example.techfix.models.Appointment;
-import com.google.android.material.button.MaterialButton;
-import java.util.ArrayList;
+import com.google.android.material.card.MaterialCardView;
 import java.util.List;
 
 public class CustomerDashboardActivity extends AppCompatActivity {
+    private TextView tvWelcomeUser, tvActiveRepairTitle, tvActiveRepairStatus;
+    private Button btnLogout;
+    private DatabaseHelper db;
 
-    private TextView tvWelcomeUser, tvEmptyMessage;
-    private MaterialButton btnBookAppointment, btnLogout;
-    private RecyclerView rvAppointments;
-    private AppointmentAdapter adapter;
-    private List<Appointment> appointmentList = new ArrayList<>();
-    private DatabaseHelper dbHelper;
-    private int userId;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_customer_dashboard);
-
-        dbHelper = new DatabaseHelper(this);
-
+    @Override protected void onCreate(Bundle state) {
+        super.onCreate(state); setContentView(R.layout.activity_customer_dashboard);
         SharedPreferences prefs = getSharedPreferences("TechFixPrefs", Context.MODE_PRIVATE);
-        userId = prefs.getInt("userId", -1);
-        String userName = prefs.getString("userName", "Customer");
-
-        tvWelcomeUser = findViewById(R.id.tvWelcomeUser);
-        tvEmptyMessage = findViewById(R.id.tvEmptyMessage);
-        btnBookAppointment = findViewById(R.id.btnBookAppointment);
-        btnLogout = findViewById(R.id.btnLogout);
-        rvAppointments = findViewById(R.id.rvAppointments);
-
-        tvWelcomeUser.setText("Welcome, " + userName + "!");
-
-        rvAppointments.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new AppointmentAdapter(appointmentList, false, this::handlePaymentSimulation);
-        rvAppointments.setAdapter(adapter);
-
-        btnBookAppointment.setOnClickListener(v -> {
-            startActivity(new Intent(CustomerDashboardActivity.this, RepairRequestActivity.class));
-        });
-
-        btnLogout.setOnClickListener(v -> {
-            SharedPreferences.Editor editor = prefs.edit();
-            editor.clear();
-            editor.apply();
-            startActivity(new Intent(CustomerDashboardActivity.this, LoginActivity.class));
-            finish();
-        });
+        tvWelcomeUser = findViewById(R.id.tvWelcomeUser); tvWelcomeUser.setText("Welcome, " + prefs.getString("userName", "Customer") + "!");
+        btnLogout = findViewById(R.id.btnLogout); db = new DatabaseHelper(this);
+        tvActiveRepairTitle = findViewById(R.id.tvActiveRepairTitle); tvActiveRepairStatus = findViewById(R.id.tvActiveRepairStatus);
+        btnLogout.setOnClickListener(v -> { prefs.edit().clear().apply(); startActivity(new Intent(this, LoginActivity.class)); finish(); });
+        findViewById(R.id.btnCustomerGallery).setOnClickListener(v -> startActivity(new Intent(this, GalleryActivity.class)));
+        findViewById(R.id.btnViewTechnicians).setOnClickListener(v -> startActivity(new Intent(this, BranchesActivity.class)));
+        findViewById(R.id.btnCustomerNearestBranch).setOnClickListener(v -> findNearestBranch());
+        findViewById(R.id.customerNavHome).setOnClickListener(v -> recreate());
+        findViewById(R.id.customerNavServices).setOnClickListener(v -> startActivity(new Intent(this, ServicesActivity.class)));
+        findViewById(R.id.customerNavBook).setOnClickListener(v -> startActivity(new Intent(this, RepairRequestActivity.class)));
+        findViewById(R.id.customerNavProfile).setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
+        loadCurrentRepair();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        loadAppointments();
-    }
-
-    private void loadAppointments() {
-        new Thread(() -> {
-            List<Appointment> list = dbHelper.getAppointmentsForUser(userId);
-            runOnUiThread(() -> {
-                appointmentList.clear();
-                appointmentList.addAll(list);
-                adapter.updateList(appointmentList);
-
-                if (appointmentList.isEmpty()) {
-                    tvEmptyMessage.setVisibility(View.VISIBLE);
-                } else {
-                    tvEmptyMessage.setVisibility(View.GONE);
-                }
-            });
-        }).start();
-    }
-
-    private void handlePaymentSimulation(Appointment appointment) {
-        // Show simulated credit card payment dialog
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        LayoutInflater inflater = getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.dialog_payment, null);
-        builder.setView(dialogView);
-
-        EditText etCardNumber = dialogView.findViewById(R.id.etCardNumber);
-        EditText etExpiry = dialogView.findViewById(R.id.etExpiry);
-        EditText etCVV = dialogView.findViewById(R.id.etCVV);
-        Button btnPayNow = dialogView.findViewById(R.id.btnPayNow);
-
-        AlertDialog dialog = builder.create();
-
-        btnPayNow.setOnClickListener(v -> {
-            String card = etCardNumber.getText().toString().trim();
-            String expiry = etExpiry.getText().toString().trim();
-            String cvv = etCVV.getText().toString().trim();
-
-            if (card.length() < 16 || expiry.isEmpty() || cvv.length() < 3) {
-                Toast.makeText(this, "Please enter valid payment details", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            // Simulate transaction
-            Toast.makeText(this, "Processing payment of Rs. 4,500.00...", Toast.LENGTH_SHORT).show();
-
-            new Thread(() -> {
-                try {
-                    Thread.sleep(1500); // Simulated delay
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                // Update database
-                dbHelper.updateAppointmentStatus(appointment.getId(), "Paid");
-
-                runOnUiThread(() -> {
-                    Toast.makeText(this, "Payment processed successfully! Appointment status is now Paid.", Toast.LENGTH_LONG).show();
-                    dialog.dismiss();
-                    loadAppointments(); // Refresh the list
-                });
-            }).start();
-        });
-
-        dialog.show();
-    }
+    private void loadCurrentRepair() { int userId = getSharedPreferences("TechFixPrefs", 0).getInt("userId", -1); new Thread(() -> { List<Appointment> list = db.getAppointmentsForUser(userId); runOnUiThread(() -> { if (list.isEmpty()) { tvActiveRepairTitle.setText("No active repair"); tvActiveRepairStatus.setText("Book a repair to see its status here."); } else { Appointment a=list.get(0); tvActiveRepairTitle.setText(a.getDeviceModel()==null||a.getDeviceModel().isEmpty()?a.getDeviceCategory()+" repair":a.getDeviceModel()); String note=a.getAssignmentNote(); tvActiveRepairStatus.setText("Assigned to "+a.getBranchName()+" ("+a.getStatus()+")"+(note==null||note.isEmpty()?"":"\n"+note)); } }); }).start(); }
+    private void findNearestBranch() { if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != getPackageManager().PERMISSION_GRANTED) { requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 17); return; } LocationManager lm=(LocationManager)getSystemService(LOCATION_SERVICE); Location here=lm.getLastKnownLocation(LocationManager.GPS_PROVIDER); if(here==null) here=lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER); if(here==null){android.widget.Toast.makeText(this,"Current GPS location is unavailable",android.widget.Toast.LENGTH_LONG).show();return;} Location c=new Location("branch");c.setLatitude(6.893982);c.setLongitude(79.854749);Location g=new Location("branch");g.setLatitude(6.032857);g.setLongitude(80.214954);android.widget.Toast.makeText(this,"Nearest branch: "+(here.distanceTo(c)<here.distanceTo(g)?"Colombo Branch":"Galle Branch"),android.widget.Toast.LENGTH_LONG).show(); }
 }

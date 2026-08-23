@@ -3,14 +3,20 @@ package com.example.techfix.models;
 public class Branch {
     private int id;
     private String locationName;
+    private String address;
     private double latitude;
     private double longitude;
 
     public Branch() {}
 
     public Branch(int id, String locationName, double latitude, double longitude) {
+        this(id, locationName, "", latitude, longitude);
+    }
+
+    public Branch(int id, String locationName, String address, double latitude, double longitude) {
         this.id = id;
         this.locationName = locationName;
+        this.address = address;
         this.latitude = latitude;
         this.longitude = longitude;
     }
@@ -29,6 +35,14 @@ public class Branch {
 
     public void setLocationName(String locationName) {
         this.locationName = locationName;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public double getLatitude() {

@@ -1,165 +1,164 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/tech_bg_dark">
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="@color/tech_bg">
 
-    <!-- Top Navigation Bar for Buttons -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="end"
-        android:padding="16dp">
+    <ScrollView android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1" android:fillViewport="true" android:clipToPadding="false">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:background="@drawable/bg_home_hero"
+            android:paddingStart="20dp" android:paddingEnd="20dp" android:paddingBottom="24dp">
 
-        <Button
-            android:id="@+id/btnHomeLogin"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Login"
-            android:textSize="12sp"
-            android:minHeight="48dp"
-            android:layout_marginEnd="8dp" />
+            <!-- Welcome / Hero -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:gravity="center_vertical" android:paddingTop="14dp" android:paddingBottom="6dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                    android:text="TECHFIX" android:textColor="@color/tech_text_main" android:textSize="14sp"
+                    android:textStyle="bold" android:letterSpacing="0.14" />
+                <Button android:id="@+id/btnHomeLogin" android:layout_width="wrap_content" android:layout_height="40dp"
+                    android:minHeight="0dp" android:minWidth="0dp" android:paddingHorizontal="12dp"
+                    android:text="Login" android:textSize="12sp" android:backgroundTint="@color/tech_surface" />
+                <Button android:id="@+id/btnHomeRegister" android:layout_width="wrap_content" android:layout_height="40dp"
+                    android:minHeight="0dp" android:minWidth="0dp" android:layout_marginStart="6dp"
+                    android:paddingHorizontal="12dp" android:text="Register" android:textSize="12sp" />
+            </LinearLayout>
 
-        <Button
-            android:id="@+id/btnHomeRegister"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Register"
-            android:textSize="12sp"
-            android:minHeight="48dp"
-            android:backgroundTint="#6C757D" />
-    </LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:gravity="center" android:paddingTop="12dp" android:paddingBottom="30dp">
+                <ImageView android:id="@+id/imgLogo" android:layout_width="112dp" android:layout_height="112dp"
+                    android:contentDescription="TechFix company logo" android:src="@drawable/techfix_logo" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp" android:gravity="center" android:text="Expert care for\nevery device."
+                    android:textColor="@color/tech_text_main" android:textSize="34sp" android:textStyle="bold"
+                    android:lineSpacingMultiplier="0.92" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp" android:gravity="center"
+                    android:text="Fast, reliable repairs backed by people you can trust."
+                    android:textColor="@color/tech_text_sub" android:textSize="14sp" />
+                <Button android:id="@+id/btnBookRepair" android:layout_width="match_parent" android:layout_height="54dp"
+                    android:layout_marginTop="22dp" android:text="Book a Repair" android:textSize="15sp"
+                    android:background="@drawable/bg_home_cta" app:icon="@drawable/ic_repair"
+                    app:iconGravity="textStart" app:iconPadding="10dp" />
+            </LinearLayout>
 
-    <!-- Scrollable Content Area -->
-    <!-- Scrollable Content Area -->
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="24dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center_horizontal">
-
-            <!-- Company Logo -->
-            <ImageView
-                android:id="@+id/imgLogo"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_marginBottom="16dp"
-                android:src="@drawable/techfix_logo" />
-
-            <!-- Main Title (Changed text color to white for visibility) -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Welcome to TechFix"
-                android:textSize="26sp"
-                android:textStyle="bold"
-                android:textColor="#FFFFFF"
-                android:layout_marginBottom="24dp" />
-
-            <!-- 1. Our Process Card -->
+            <!-- How It Works -->
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/homeHowItWorksCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 app:cardBackgroundColor="@color/tech_surface"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="8dp">
-
+                app:cardCornerRadius="20dp"
+                app:cardElevation="3dp"
+                app:strokeColor="#265FD4E3"
+                app:strokeWidth="1dp">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="How It Works"
-                        android:textColor="@color/tech_accent"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="8dp"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="1. Create an account or log in.\n2. Request a repair and get a price estimate.\n3. Drop off your device or ship it to us.\n4. Track your repair status live from your dashboard."
-                        android:textColor="@color/tech_text_secondary"
-                        android:lineSpacingExtra="6dp"
-                        android:textSize="14sp" />
+                    android:padding="18dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="How It Works" android:textColor="@color/tech_accent" android:textSize="20sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="From booking to back in your hands" android:textColor="@color/tech_text_sub" android:textSize="12sp" />
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:orientation="horizontal" android:gravity="center">
+                        <LinearLayout android:id="@+id/homeHowItWorksBook" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:clickable="true" android:focusable="true">
+                            <ImageView android:id="@+id/homeHowItWorksBookIcon" android:layout_width="38dp" android:layout_height="38dp" android:padding="9dp" android:background="@drawable/bg_home_cta" android:src="@drawable/ic_book" app:tint="@color/tech_accent" android:contentDescription="Book" />
+                            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:gravity="center" android:text="Book" android:textColor="@color/tech_text_main" android:textSize="12sp" />
+                        </LinearLayout>
+                        <TextView android:layout_width="14dp" android:layout_height="38dp" android:gravity="center" android:text="—" android:textColor="#55555C" />
+                        <LinearLayout android:id="@+id/homeHowItWorksDiagnose" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:clickable="true" android:focusable="true">
+                            <ImageView android:id="@+id/homeHowItWorksDiagnoseIcon" android:layout_width="38dp" android:layout_height="38dp" android:padding="9dp" android:background="@drawable/bg_home_tile" android:src="@drawable/ic_computer" app:tint="@color/tech_accent" android:contentDescription="Diagnose" />
+                            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:gravity="center" android:text="Diagnose" android:textColor="@color/tech_text_main" android:textSize="12sp" />
+                        </LinearLayout>
+                        <TextView android:layout_width="14dp" android:layout_height="38dp" android:gravity="center" android:text="—" android:textColor="#55555C" />
+                        <LinearLayout android:id="@+id/homeHowItWorksRepair" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:clickable="true" android:focusable="true">
+                            <ImageView android:id="@+id/homeHowItWorksRepairIcon" android:layout_width="38dp" android:layout_height="38dp" android:padding="9dp" android:background="@drawable/bg_home_tile" android:src="@drawable/ic_repair" app:tint="@color/tech_accent" android:contentDescription="Repair" />
+                            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:gravity="center" android:text="Repair" android:textColor="@color/tech_text_main" android:textSize="12sp" />
+                        </LinearLayout>
+                        <TextView android:layout_width="14dp" android:layout_height="38dp" android:gravity="center" android:text="—" android:textColor="#55555C" />
+                        <LinearLayout android:id="@+id/homeHowItWorksTrack" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:clickable="true" android:focusable="true">
+                            <ImageView android:id="@+id/homeHowItWorksTrackIcon" android:layout_width="38dp" android:layout_height="38dp" android:padding="9dp" android:background="@drawable/bg_home_tile" android:src="@drawable/ic_track" app:tint="@color/tech_accent" android:contentDescription="Track" />
+                            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:gravity="center" android:text="Track" android:textColor="@color/tech_text_main" android:textSize="12sp" />
+                        </LinearLayout>
+                    </LinearLayout>
+                    <TextView android:id="@+id/homeHowItWorksDescription" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:padding="12dp" android:textColor="#B3B3B3" android:textSize="13sp" android:visibility="gone" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- 2. Our Services Card -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardBackgroundColor="@color/tech_surface"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="8dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Our Services"
-                        android:textColor="@color/tech_accent"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="8dp"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="• Desktop &amp; Laptop Hardware Repair\n• OS Installation &amp; Software Troubleshooting\n• Custom PC Builds &amp; Upgrades"
-                        android:textColor="@color/tech_text_secondary"
-                        android:lineSpacingExtra="6dp"
-                        android:textSize="14sp" />
+            <!-- Our Services -->            <com.google.android.material.card.MaterialCardView android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="@color/tech_surface" app:cardCornerRadius="20dp" app:cardElevation="0dp"
+                app:strokeColor="#265FD4E3" app:strokeWidth="1dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="18dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Our Services" android:textColor="@color/tech_accent" android:textSize="20sp" android:textStyle="bold" />
+                    <GridLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="14dp" android:columnCount="2" android:useDefaultMargins="false">
+                        <LinearLayout android:layout_width="0dp" android:layout_height="88dp" android:layout_columnWeight="1" android:layout_marginEnd="6dp" android:layout_marginBottom="6dp" android:background="@drawable/bg_home_tile" android:gravity="center_vertical" android:orientation="vertical" android:padding="14dp">
+                            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_repair" app:tint="@color/tech_accent" android:contentDescription="Hardware repair" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Hardware Repair" android:textColor="@color/tech_text_main" android:textSize="13sp" android:textStyle="bold" />
+                        </LinearLayout>
+                        <LinearLayout android:layout_width="0dp" android:layout_height="88dp" android:layout_columnWeight="1" android:layout_marginStart="6dp" android:layout_marginBottom="6dp" android:background="@drawable/bg_home_tile" android:gravity="center_vertical" android:orientation="vertical" android:padding="14dp">
+                            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_settings" app:tint="@color/tech_accent" android:contentDescription="OS installation" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="OS Installation" android:textColor="@color/tech_text_main" android:textSize="13sp" android:textStyle="bold" />
+                        </LinearLayout>
+                        <LinearLayout android:layout_width="0dp" android:layout_height="88dp" android:layout_columnWeight="1" android:layout_marginEnd="6dp" android:layout_marginTop="6dp" android:background="@drawable/bg_home_tile" android:gravity="center_vertical" android:orientation="vertical" android:padding="14dp">
+                            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_computer" app:tint="@color/tech_accent" android:contentDescription="Custom PC builds" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Custom PC Builds" android:textColor="@color/tech_text_main" android:textSize="13sp" android:textStyle="bold" />
+                        </LinearLayout>
+                        <LinearLayout android:layout_width="0dp" android:layout_height="88dp" android:layout_columnWeight="1" android:layout_marginStart="6dp" android:layout_marginTop="6dp" android:background="@drawable/bg_home_tile" android:gravity="center_vertical" android:orientation="vertical" android:padding="14dp">
+                            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_track" app:tint="@color/tech_accent" android:contentDescription="Troubleshooting" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Troubleshooting" android:textColor="@color/tech_text_main" android:textSize="13sp" android:textStyle="bold" />
+                        </LinearLayout>
+                    </GridLayout>
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btnHomeViewServices" android:layout_width="match_parent" android:layout_height="50dp" android:layout_marginTop="14dp" android:text="View All Services" android:textColor="@color/tech_white" app:backgroundTint="@color/tech_primary" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- 3. Our Locations Card -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="32dp"
-                app:cardBackgroundColor="@color/tech_surface"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="8dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Our Locations"
-                        android:textColor="@color/tech_accent"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="8dp"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="📍 Colombo Branch: 123 Main Street\n📍 Galle Branch: 45 Coastal Road\n\nOpen Mon - Sat, 9:00 AM to 6:00 PM"
-                        android:textColor="@color/tech_text_secondary"
-                        android:lineSpacingExtra="6dp"
-                        android:textSize="14sp" />
+            <!-- Our Locations -->
+            <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content"
+                app:cardBackgroundColor="@color/tech_surface" app:cardCornerRadius="20dp" app:strokeColor="#265FD4E3" app:strokeWidth="1dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="18dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical">
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Our Locations" android:textColor="@color/tech_accent" android:textSize="20sp" android:textStyle="bold" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="28dp" android:background="@drawable/bg_open_chip" android:gravity="center" android:paddingHorizontal="10dp" android:text="●  Open now" android:textColor="@color/tech_success" android:textSize="11sp" android:textStyle="bold" />
+                    </LinearLayout>
+                    <com.example.techfix.views.OfflineBranchMapView android:id="@+id/branchMap" android:layout_width="match_parent" android:layout_height="180dp" android:layout_marginTop="14dp" />
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btnNearestBranch" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Find Nearest Branch" android:layout_marginTop="10dp" app:backgroundTint="@color/tech_button_tint" />
+                    <LinearLayout android:visibility="gone" android:layout_width="match_parent" android:layout_height="112dp" android:layout_marginTop="14dp" android:background="@drawable/bg_map_thumb" android:gravity="center_vertical" android:padding="14dp">
+                        <FrameLayout android:layout_width="82dp" android:layout_height="82dp" android:background="#202526">
+                            <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_gravity="center" android:background="#3A4142" android:rotation="-18" />
+                            <View android:layout_width="1dp" android:layout_height="match_parent" android:layout_gravity="center" android:background="#3A4142" android:rotation="28" />
+                            <ImageView android:layout_width="34dp" android:layout_height="34dp" android:layout_gravity="center" android:padding="5dp" android:src="@drawable/ic_location" app:tint="@color/tech_accent" android:contentDescription="Map location pin" />
+                        </FrameLayout>
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="14dp" android:orientation="vertical">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/colombo_branch_name" android:textColor="@color/tech_text_main" android:textSize="14sp" android:textStyle="bold" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="@string/colombo_branch_address" android:textColor="@color/tech_text_sub" android:textSize="12sp" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="9dp" android:text="@string/galle_branch_name" android:textColor="#D5D5D7" android:textSize="12sp" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="@string/galle_branch_address" android:textColor="@color/tech_text_sub" android:textSize="11sp" />
+                        </LinearLayout>
+                    </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
-
         </LinearLayout>
     </ScrollView>
+
+    <!-- Persistent bottom navigation -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="76dp" android:orientation="horizontal"
+        android:gravity="center" android:background="@color/tech_surface" android:paddingTop="8dp" android:paddingBottom="8dp">
+        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
+            <ImageView android:layout_width="23dp" android:layout_height="23dp" android:src="@drawable/ic_home" app:tint="@color/tech_accent" android:contentDescription="Home" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Home" android:textColor="@color/tech_accent" android:textSize="11sp" android:textStyle="bold" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/navServices" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:clickable="true" android:focusable="true">
+            <ImageView android:layout_width="23dp" android:layout_height="23dp" android:src="@drawable/ic_wrench" app:tint="@color/tech_text_sub" android:contentDescription="Services" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Services" android:textColor="@color/tech_text_sub" android:textSize="11sp" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/navBook" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:clickable="true" android:focusable="true">
+            <ImageView android:layout_width="23dp" android:layout_height="23dp" android:src="@drawable/ic_book" app:tint="@color/tech_text_sub" android:contentDescription="Book" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Book" android:textColor="@color/tech_text_sub" android:textSize="11sp" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/navProfile" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:clickable="true" android:focusable="true">
+            <ImageView android:layout_width="23dp" android:layout_height="23dp" android:src="@drawable/ic_profile" app:tint="@color/tech_text_sub" android:contentDescription="Profile" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Login" android:textColor="@color/tech_text_sub" android:textSize="11sp" />
+        </LinearLayout>
+    </LinearLayout>
 </LinearLayout>

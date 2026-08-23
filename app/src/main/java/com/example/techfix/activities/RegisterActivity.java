@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.widget.Button;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,7 +15,6 @@ import com.google.android.material.textfield.TextInputEditText;
 public class RegisterActivity extends AppCompatActivity {
 
     private TextInputEditText etRegName, etRegEmail, etRegPassword;
-    private RadioGroup rgRole;
     private Button btnRegister;
     private TextView tvLoginLink;
     private DatabaseHelper dbHelper;
@@ -31,7 +29,6 @@ public class RegisterActivity extends AppCompatActivity {
         etRegName = findViewById(R.id.etRegName);
         etRegEmail = findViewById(R.id.etRegEmail);
         etRegPassword = findViewById(R.id.etRegPassword);
-        rgRole = findViewById(R.id.rgRole);
         btnRegister = findViewById(R.id.btnRegister);
         tvLoginLink = findViewById(R.id.tvLoginLink);
 
@@ -45,13 +42,7 @@ public class RegisterActivity extends AppCompatActivity {
                 return;
             }
 
-            int checkedId = rgRole.getCheckedRadioButtonId();
-            String role = "customer";
-            if (checkedId == R.id.rbAdmin) {
-                role = "admin";
-            }
-
-            final String userRole = role;
+            final String userRole = "customer";
 
             new Thread(() -> {
                 if (dbHelper.isEmailExists(email)) {

@@ -5,11 +5,16 @@ public class Appointment {
     private int userId;
     private int branchId;
     private String deviceCategory; // "Mobile" or "Laptop"
-    private String status; // "Pending", "In Progress", "Completed"
+    private String deviceModel;
+    private String issueDescription;
+    private double price;
+    private String status; // "Pending", "In Progress", "Completed", "Paid"
 
     // Display fields
     private String userName;
     private String branchName;
+    private String technicianName;
+    private String assignmentNote;
 
     public Appointment() {}
 
@@ -53,6 +58,13 @@ public class Appointment {
         this.deviceCategory = deviceCategory;
     }
 
+    public String getDeviceModel() { return deviceModel; }
+    public void setDeviceModel(String deviceModel) { this.deviceModel = deviceModel; }
+    public String getIssueDescription() { return issueDescription; }
+    public void setIssueDescription(String issueDescription) { this.issueDescription = issueDescription; }
+    public double getPrice() { return price; }
+    public void setPrice(double price) { this.price = price; }
+
     public String getStatus() {
         return status;
     }
@@ -76,4 +88,9 @@ public class Appointment {
     public void setBranchName(String branchName) {
         this.branchName = branchName;
     }
+
+    public String getTechnicianName() { return technicianName; }
+    public void setTechnicianName(String technicianName) { this.technicianName = technicianName; }
+    public String getAssignmentNote() { return assignmentNote; }
+    public void setAssignmentNote(String assignmentNote) { this.assignmentNote = assignmentNote; }
 }
