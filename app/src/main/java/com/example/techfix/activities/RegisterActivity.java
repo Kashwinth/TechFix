@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.techfix.R;
 import com.example.techfix.database.DatabaseHelper;
 import com.example.techfix.models.User;
+import com.example.techfix.utils.CustomerNavigation;
 import com.google.android.material.textfield.TextInputEditText;
 
 public class RegisterActivity extends AppCompatActivity {
@@ -23,6 +24,11 @@ public class RegisterActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+        CustomerNavigation.bind(this, "profile");
+        findViewById(R.id.customerNavProfile).setOnClickListener(v -> {
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+        });
 
         dbHelper = new DatabaseHelper(this);
 

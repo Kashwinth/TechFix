@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/customerBottomNav"
+    android:layout_width="match_parent"
+    android:layout_height="76dp"
+    android:background="@color/tech_surface"
+    android:elevation="8dp"
+    android:gravity="center"
+    android:orientation="horizontal"
+    android:paddingStart="12dp"
+    android:paddingTop="8dp"
+    android:paddingEnd="12dp"
+    android:paddingBottom="8dp">
+
+    <LinearLayout
+        android:id="@+id/customerNavHome"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
+        android:gravity="center"
+        android:orientation="vertical">
+        <ImageView
+            android:id="@+id/customerNavHomeIcon"
+            android:layout_width="23dp"
+            android:layout_height="23dp"
+            android:contentDescription="Home"
+            android:src="@drawable/ic_home"
+            app:tint="@color/tech_text_sub" />
+        <TextView
+            android:id="@+id/customerNavHomeLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Home"
+            android:textColor="@color/tech_text_sub"
+            android:textSize="11sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/customerNavServices"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
+        android:gravity="center"
+        android:orientation="vertical">
+        <ImageView
+            android:id="@+id/customerNavServicesIcon"
+            android:layout_width="23dp"
+            android:layout_height="23dp"
+            android:contentDescription="Services"
+            android:src="@drawable/ic_wrench"
+            app:tint="@color/tech_text_sub" />
+        <TextView
+            android:id="@+id/customerNavServicesLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Services"
+            android:textColor="@color/tech_text_sub"
+            android:textSize="11sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/customerNavBook"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
+        android:gravity="center"
+        android:orientation="vertical">
+        <ImageView
+            android:id="@+id/customerNavBookIcon"
+            android:layout_width="23dp"
+            android:layout_height="23dp"
+            android:contentDescription="Book"
+            android:src="@drawable/ic_book"
+            app:tint="@color/tech_text_sub" />
+        <TextView
+            android:id="@+id/customerNavBookLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Book"
+            android:textColor="@color/tech_text_sub"
+            android:textSize="11sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/customerNavProfile"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
+        android:gravity="center"
+        android:orientation="vertical">
+        <ImageView
+            android:id="@+id/customerNavProfileIcon"
+            android:layout_width="23dp"
+            android:layout_height="23dp"
+            android:contentDescription="Profile"
+            android:src="@drawable/ic_profile"
+            app:tint="@color/tech_text_sub" />
+        <TextView
+            android:id="@+id/customerNavProfileLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Profile"
+            android:textColor="@color/tech_text_sub"
+            android:textSize="11sp" />
+    </LinearLayout>
+</LinearLayout>

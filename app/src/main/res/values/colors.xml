@@ -1,26 +1,37 @@
 <resources>
-    <color name="tech_bg">#121212</color>
-    <color name="tech_surface">#1E1E1E</color>
-    <color name="tech_primary">#1B9AAA</color>
-    <color name="tech_accent">#5FD4E3</color>
-    <color name="tech_text_main">#FFFFFF</color>
-    <color name="tech_text_sub">#B3B3B3</color>
-    <color name="tech_success">#6FCF97</color>
-    <color name="tech_warning">#E0A93B</color>
+    <!-- Light theme palette. The existing dark palette is retained in values-night/colors.xml. -->
+    <color name="tech_bg">#F4F8F9</color>
+    <color name="tech_surface">#FFFFFF</color>
+    <color name="tech_primary">#8BE3EC</color>
+    <color name="tech_accent">#087E8B</color>
+    <color name="tech_text_main">#172124</color>
+    <color name="tech_text_sub">#5F6D71</color>
+    <color name="tech_success">#2E7D52</color>
+    <color name="tech_warning">#B66A00</color>
 
-    <!-- Compatibility tokens used by the remaining screens. -->
+    <!-- Compatibility tokens used throughout the screens. -->
     <color name="tech_bg_dark">@color/tech_bg</color>
-    <color name="tech_bg_deep">@color/tech_bg</color>
-    <color name="tech_surface_high">@color/tech_surface</color>
-    <color name="tech_field">@color/tech_surface</color>
+    <color name="tech_bg_deep">#E8F1F3</color>
+    <color name="tech_surface_high">#EDF4F5</color>
+    <color name="tech_field">#F7FAFB</color>
     <color name="tech_accent_bright">@color/tech_accent</color>
     <color name="tech_text_primary">@color/tech_text_main</color>
     <color name="tech_text_secondary">@color/tech_text_sub</color>
-    <color name="tech_outline">#265FD4E3</color>
+    <color name="tech_outline">#3D087E8B</color>
     <color name="tech_outline_strong">@color/tech_accent</color>
-    <color name="tech_disabled">@color/tech_text_sub</color>
-    <color name="tech_status_pending">@color/tech_primary</color>
-    <color name="tech_status_progress">@color/tech_primary</color>
+    <color name="tech_disabled">#9AA7AA</color>
+    <color name="tech_status_pending">#C57A00</color>
+    <color name="tech_status_progress">#287AA9</color>
     <color name="tech_status_complete">@color/tech_success</color>
     <color name="tech_white">@color/tech_text_main</color>
+
+    <!-- Theme-aware decorative colors. -->
+    <color name="tech_hero_glow">#451B9AAA</color>
+    <color name="tech_hero_center">#EEF7F8</color>
+    <color name="tech_outline_soft">#33087E8B</color>
+    <color name="tech_outline_medium">#66087E8B</color>
+    <color name="tech_divider">#24087E8B</color>
+    <color name="tech_privileged_surface">#E3F3F4</color>
+    <color name="tech_map_surface">#DFEAEC</color>
+    <color name="tech_map_line">#B7C9CC</color>
 </resources>

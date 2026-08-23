@@ -10,6 +10,8 @@
         <item name="colorOnSurfaceVariant">@color/tech_text_secondary</item>
         <item name="colorOutline">@color/tech_outline_strong</item>
         <item name="android:colorAccent">@color/tech_accent</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
         <item name="android:statusBarColor">@color/tech_bg_deep</item>
         <item name="android:navigationBarColor">@color/tech_bg_deep</item>
         <item name="android:windowBackground">@color/tech_bg_dark</item>
