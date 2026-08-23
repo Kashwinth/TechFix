@@ -13,6 +13,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import com.example.techfix.R;
+import com.example.techfix.utils.CustomerNavigation;
 import com.example.techfix.database.DatabaseHelper;
 import com.example.techfix.models.Appointment;
 import com.google.android.material.card.MaterialCardView;
@@ -30,13 +31,11 @@ public class CustomerDashboardActivity extends AppCompatActivity {
         btnLogout = findViewById(R.id.btnLogout); db = new DatabaseHelper(this);
         tvActiveRepairTitle = findViewById(R.id.tvActiveRepairTitle); tvActiveRepairStatus = findViewById(R.id.tvActiveRepairStatus);
         btnLogout.setOnClickListener(v -> { prefs.edit().clear().apply(); startActivity(new Intent(this, LoginActivity.class)); finish(); });
+        findViewById(R.id.btnCustomerTrackRepairs).setOnClickListener(v -> startActivity(new Intent(this, RepairHistoryActivity.class)));
         findViewById(R.id.btnCustomerGallery).setOnClickListener(v -> startActivity(new Intent(this, GalleryActivity.class)));
         findViewById(R.id.btnViewTechnicians).setOnClickListener(v -> startActivity(new Intent(this, BranchesActivity.class)));
         findViewById(R.id.btnCustomerNearestBranch).setOnClickListener(v -> findNearestBranch());
-        findViewById(R.id.customerNavHome).setOnClickListener(v -> recreate());
-        findViewById(R.id.customerNavServices).setOnClickListener(v -> startActivity(new Intent(this, ServicesActivity.class)));
-        findViewById(R.id.customerNavBook).setOnClickListener(v -> startActivity(new Intent(this, RepairRequestActivity.class)));
-        findViewById(R.id.customerNavProfile).setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
+        CustomerNavigation.bind(this, "profile");
         loadCurrentRepair();
     }
 

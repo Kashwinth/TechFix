@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.techfix.R;
 import com.example.techfix.database.DatabaseHelper;
 import com.example.techfix.models.User;
+import com.example.techfix.utils.CustomerNavigation;
 import com.google.android.material.textfield.TextInputEditText;
 
 public class LoginActivity extends AppCompatActivity {
@@ -37,13 +38,14 @@ public class LoginActivity extends AppCompatActivity {
             } else if (returnToTrack) {
                 startActivity(new Intent(LoginActivity.this, RepairHistoryActivity.class));
             } else {
-                startActivity(new Intent(LoginActivity.this, CustomerDashboardActivity.class));
+                startActivity(new Intent(LoginActivity.this, HomeActivity.class));
             }
             finish();
             return;
         }
 
         setContentView(R.layout.activity_login);
+        CustomerNavigation.bind(this, "profile");
 
         dbHelper = new DatabaseHelper(this);
 
@@ -85,7 +87,7 @@ public class LoginActivity extends AppCompatActivity {
                             } else if (returnToTrack) {
                                 destination = new Intent(this, RepairHistoryActivity.class);
                             } else {
-                                destination = new Intent(this, CustomerDashboardActivity.class);
+                                destination = new Intent(this, HomeActivity.class);
                             }
                             startActivity(destination);
                             finish();
