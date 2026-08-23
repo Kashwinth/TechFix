@@ -286,6 +286,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
         String next = "Pending".equalsIgnoreCase(status) ? "In Progress" : "Completed";
         io.execute(() -> {
             boolean ok = db.updateAppointmentStatus(id, next);
+            if (ok) com.example.techfix.data.TechFixDatabase.get(this).repairDao().updateStatusForAppointment(id, next);
             runOnUiThread(() -> {
                 if (ok) {
                     Toast.makeText(this, "Status updated to " + next, Toast.LENGTH_SHORT).show();

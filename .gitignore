@@ -13,3 +13,5 @@
 .externalNativeBuild
 .cxx
 local.properties
+EXPLAIN.md
+/plan

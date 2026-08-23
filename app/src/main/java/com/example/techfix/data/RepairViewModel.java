@@ -1,3 +1,13 @@
 package com.example.techfix.data;
-import androidx.lifecycle.*;
-public class RepairViewModel extends AndroidViewModel { public final LiveData<java.util.List<RepairJob>> jobs; public RepairViewModel(android.app.Application a){super(a);jobs=TechFixDatabase.get(a).repairDao().jobs();} }
+
+import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
+import java.util.List;
+
+public class RepairViewModel extends AndroidViewModel {
+    public RepairViewModel(android.app.Application application) { super(application); }
+
+    public LiveData<List<RepairJob>> jobsForUser(int userId) {
+        return TechFixDatabase.get(getApplication()).repairDao().jobsForUser(userId);
+    }
+}

@@ -1,0 +1,35 @@
+<resources>
+    <!-- Original TechFix dark palette. -->
+    <color name="tech_bg">#121212</color>
+    <color name="tech_surface">#1E1E1E</color>
+    <color name="tech_primary">#1B9AAA</color>
+    <color name="tech_accent">#5FD4E3</color>
+    <color name="tech_text_main">#FFFFFF</color>
+    <color name="tech_text_sub">#B3B3B3</color>
+    <color name="tech_success">#6FCF97</color>
+    <color name="tech_warning">#E0A93B</color>
+
+    <color name="tech_bg_dark">@color/tech_bg</color>
+    <color name="tech_bg_deep">@color/tech_bg</color>
+    <color name="tech_surface_high">@color/tech_surface</color>
+    <color name="tech_field">@color/tech_surface</color>
+    <color name="tech_accent_bright">@color/tech_accent</color>
+    <color name="tech_text_primary">@color/tech_text_main</color>
+    <color name="tech_text_secondary">@color/tech_text_sub</color>
+    <color name="tech_outline">#265FD4E3</color>
+    <color name="tech_outline_strong">@color/tech_accent</color>
+    <color name="tech_disabled">@color/tech_text_sub</color>
+    <color name="tech_status_pending">@color/tech_primary</color>
+    <color name="tech_status_progress">@color/tech_primary</color>
+    <color name="tech_status_complete">@color/tech_success</color>
+    <color name="tech_white">@color/tech_text_main</color>
+
+    <color name="tech_hero_glow">#261B9AAA</color>
+    <color name="tech_hero_center">#1D1718</color>
+    <color name="tech_outline_soft">#265FD4E3</color>
+    <color name="tech_outline_medium">#665FD4E3</color>
+    <color name="tech_divider">#1F5FD4E3</color>
+    <color name="tech_privileged_surface">#172728</color>
+    <color name="tech_map_surface">#202526</color>
+    <color name="tech_map_line">#3A4142</color>
+</resources>

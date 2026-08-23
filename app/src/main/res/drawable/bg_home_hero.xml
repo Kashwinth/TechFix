@@ -5,7 +5,7 @@
         android:centerX="50%"
         android:centerY="8%"
         android:gradientRadius="320dp"
-        android:startColor="#261B9AAA"
-        android:centerColor="#1D1718"
+        android:startColor="@color/tech_hero_glow"
+        android:centerColor="@color/tech_hero_center"
         android:endColor="@color/tech_bg" />
 </shape>

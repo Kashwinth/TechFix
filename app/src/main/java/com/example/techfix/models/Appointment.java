@@ -7,6 +7,8 @@ public class Appointment {
     private String deviceCategory; // "Mobile" or "Laptop"
     private String deviceModel;
     private String issueDescription;
+    private int serviceId;
+    private String serviceName;
     private double price;
     private String status; // "Pending", "In Progress", "Completed", "Paid"
 
@@ -15,6 +17,7 @@ public class Appointment {
     private String branchName;
     private String technicianName;
     private String assignmentNote;
+    private String photoPath;
 
     public Appointment() {}
 
@@ -64,6 +67,10 @@ public class Appointment {
     public void setIssueDescription(String issueDescription) { this.issueDescription = issueDescription; }
     public double getPrice() { return price; }
     public void setPrice(double price) { this.price = price; }
+    public int getServiceId() { return serviceId; }
+    public void setServiceId(int serviceId) { this.serviceId = serviceId; }
+    public String getServiceName() { return serviceName; }
+    public void setServiceName(String serviceName) { this.serviceName = serviceName; }
 
     public String getStatus() {
         return status;
@@ -93,4 +100,6 @@ public class Appointment {
     public void setTechnicianName(String technicianName) { this.technicianName = technicianName; }
     public String getAssignmentNote() { return assignmentNote; }
     public void setAssignmentNote(String assignmentNote) { this.assignmentNote = assignmentNote; }
+    public String getPhotoPath() { return photoPath; }
+    public void setPhotoPath(String photoPath) { this.photoPath = photoPath; }
 }
