@@ -2,6 +2,7 @@ package com.example.techfix.activities;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
@@ -16,6 +17,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import com.example.techfix.R;
+import com.example.techfix.utils.BranchLocationHelper;
 import com.example.techfix.utils.CustomerNavigation;
 import com.example.techfix.utils.ThemeManager;
 
@@ -83,5 +85,17 @@ public class HomeActivity extends AppCompatActivity {
 
     private void bindStep(int id,ImageView icon,String text){findViewById(id).setOnClickListener(v->{boolean collapse=activeStep==v;TransitionManager.beginDelayedTransition(howItWorksCard,new AutoTransition());resetHighlights();if(collapse){howItWorksDescription.setVisibility(View.GONE);activeStep=null;}else{howItWorksDescription.setText(text);howItWorksDescription.setVisibility(View.VISIBLE);icon.setAlpha(1f);activeStep=v;}});}
     private void resetHighlights(){bookIcon.setAlpha(.65f);diagnoseIcon.setAlpha(.65f);repairIcon.setAlpha(.65f);trackIcon.setAlpha(.65f);}
-    private void findNearestBranch(){if(ActivityCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION)!=getPackageManager().PERMISSION_GRANTED){requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},7);return;}android.location.LocationManager lm=(android.location.LocationManager)getSystemService(LOCATION_SERVICE);Location here=lm.getLastKnownLocation(android.location.LocationManager.GPS_PROVIDER);if(here==null)here=lm.getLastKnownLocation(android.location.LocationManager.NETWORK_PROVIDER);if(here==null){Toast.makeText(this,"Current GPS location is unavailable",Toast.LENGTH_LONG).show();return;}Location c=new Location("branch");c.setLatitude(6.893982);c.setLongitude(79.854749);Location g=new Location("branch");g.setLatitude(6.032857);g.setLongitude(80.214954);Toast.makeText(this,"Nearest branch: "+(here.distanceTo(c)<here.distanceTo(g)?"Colombo Branch":"Galle Branch"),Toast.LENGTH_LONG).show();}
+    private void findNearestBranch() {
+        BranchLocationHelper.findNearest(this, branchName ->
+                Toast.makeText(this, "Nearest branch: " + branchName, Toast.LENGTH_LONG).show());
+    }
+
+    @Override public void onRequestPermissionsResult(int requestCode,
+                                                     String[] permissions,
+                                                     int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        BranchLocationHelper.handlePermissionResult(this, requestCode, grantResults,
+                branchName -> Toast.makeText(this, "Nearest branch: " + branchName,
+                        Toast.LENGTH_LONG).show());
+    }
 }
