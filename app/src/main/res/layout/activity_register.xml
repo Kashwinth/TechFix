@@ -48,7 +48,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginBottom="24dp"
-                        android:text="Create an account to get started"
+                        aandroid:text="Sign up to continue"
                         android:textColor="@color/tech_text_secondary"
                         android:textSize="14sp" />
 
