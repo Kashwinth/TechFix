@@ -1,0 +1,715 @@
+===== app/src/main/java/com/example/techfix/activities/HomeActivity.java =====
+package com.example.techfix.activities;
+
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.location.Location;
+import android.os.Bundle;
+import android.transition.AutoTransition;
+import android.transition.TransitionManager;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.PopupMenu;
+import android.widget.TextView;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import com.example.techfix.R;
+import com.example.techfix.utils.BranchLocationHelper;
+import com.example.techfix.utils.CustomerNavigation;
+import com.example.techfix.utils.ThemeManager;
+
+public class HomeActivity extends AppCompatActivity {
+    private ViewGroup howItWorksCard;
+    private TextView howItWorksDescription;
+    private ImageView bookIcon, diagnoseIcon, repairIcon, trackIcon;
+    private View activeStep;
+
+    @Override protected void onCreate(Bundle state) {
+        super.onCreate(state);
+
+        setContentView(R.layout.activity_home);
+        CustomerNavigation.bind(this, "home");
+        TextView customerName = findViewById(R.id.tvHomeCustomerName);
+        if (getSharedPreferences("TechFixPrefs", MODE_PRIVATE).getBoolean("isLoggedIn", false)) {
+            customerName.setText(getSharedPreferences("TechFixPrefs", MODE_PRIVATE).getString("userName", ""));
+            customerName.setVisibility(View.VISIBLE);
+        }
+        View menuButton = findViewById(R.id.btnHomeMenu);
+        menuButton.setOnClickListener(v -> showAccountMenu(menuButton));
+        findViewById(R.id.btnBookRepair).setOnClickListener(v->startActivity(new Intent(this,RepairRequestActivity.class)));
+        findViewById(R.id.btnHomeViewServices).setOnClickListener(v->startActivity(new Intent(this,ServicesActivity.class)));
+        findViewById(R.id.btnNearestBranch).setOnClickListener(v->findNearestBranch());
+        howItWorksCard=findViewById(R.id.homeHowItWorksCard); howItWorksDescription=findViewById(R.id.homeHowItWorksDescription);
+        bookIcon=findViewById(R.id.homeHowItWorksBookIcon); diagnoseIcon=findViewById(R.id.homeHowItWorksDiagnoseIcon); repairIcon=findViewById(R.id.homeHowItWorksRepairIcon); trackIcon=findViewById(R.id.homeHowItWorksTrackIcon); resetHighlights();
+        bindStep(R.id.homeHowItWorksBook,bookIcon,"Choose your device and issue, and schedule a repair appointment at your nearest branch in just a few taps.");
+        bindStep(R.id.homeHowItWorksDiagnose,diagnoseIcon,"Our technicians inspect your device and confirm the issue along with an accurate price estimate before any work begins.");
+        bindStep(R.id.homeHowItWorksRepair,repairIcon,"Skilled technicians repair your device using genuine parts, keeping you updated on progress along the way.");
+        bindStep(R.id.homeHowItWorksTrack,trackIcon,"Follow your repair status in real time from your dashboard, from drop-off to pickup.");
+    }
+    private void showAccountMenu(View anchor) {
+        PopupMenu menu = new PopupMenu(this, anchor);
+        boolean loggedIn = getSharedPreferences("TechFixPrefs", MODE_PRIVATE)
+                .getBoolean("isLoggedIn", false);
+        if (loggedIn) {
+            menu.getMenu().add("Profile").setIcon(R.drawable.ic_profile);
+            menu.getMenu().add("Logout").setIcon(R.drawable.ic_logout);
+        } else {
+            menu.getMenu().add("Login").setIcon(R.drawable.ic_profile);
+            menu.getMenu().add("Register").setIcon(R.drawable.ic_book);
+        }
+        menu.getMenu().add(ThemeManager.isDarkMode(this)
+                ? "Switch to Light Theme" : "Switch to Dark Theme");
+        menu.setOnMenuItemClickListener(item -> {
+            String title = item.getTitle().toString();
+            if (title.startsWith("Switch to")) {
+                ThemeManager.setDarkMode(this, !ThemeManager.isDarkMode(this));
+                return true;
+            }
+            if ("Logout".equals(title)) {
+                getSharedPreferences("TechFixPrefs", MODE_PRIVATE).edit().clear().apply();
+                recreate();
+                return true;
+            }
+            Class<?> destination;
+            if ("Profile".equals(title)) destination = ProfileActivity.class;
+            else if ("Login".equals(title)) destination = LoginActivity.class;
+            else destination = RegisterActivity.class;
+            startActivity(new Intent(this, destination));
+            return true;
+        });
+        menu.show();
+    }
+
+    private void bindStep(int id,ImageView icon,String text){findViewById(id).setOnClickListener(v->{boolean collapse=activeStep==v;TransitionManager.beginDelayedTransition(howItWorksCard,new AutoTransition());resetHighlights();if(collapse){howItWorksDescription.setVisibility(View.GONE);activeStep=null;}else{howItWorksDescription.setText(text);howItWorksDescription.setVisibility(View.VISIBLE);icon.setAlpha(1f);activeStep=v;}});}
+    private void resetHighlights(){bookIcon.setAlpha(.65f);diagnoseIcon.setAlpha(.65f);repairIcon.setAlpha(.65f);trackIcon.setAlpha(.65f);}
+    private void findNearestBranch() {
+        BranchLocationHelper.findNearest(this, branchName ->
+                Toast.makeText(this, "Nearest branch: " + branchName, Toast.LENGTH_LONG).show());
+    }
+
+    @Override public void onRequestPermissionsResult(int requestCode,
+                                                     String[] permissions,
+                                                     int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        BranchLocationHelper.handlePermissionResult(this, requestCode, grantResults,
+                branchName -> Toast.makeText(this, "Nearest branch: " + branchName,
+                        Toast.LENGTH_LONG).show());
+    }
+}
+
+===== app/src/main/java/com/example/techfix/activities/CustomerDashboardActivity.java =====
+package com.example.techfix.activities;
+
+import android.Manifest;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.location.Location;
+import android.location.LocationManager;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import com.example.techfix.R;
+import com.example.techfix.utils.BranchLocationHelper;
+import com.example.techfix.utils.CustomerNavigation;
+import com.example.techfix.database.DatabaseHelper;
+import com.example.techfix.models.Appointment;
+import com.google.android.material.card.MaterialCardView;
+import java.util.List;
+
+public class CustomerDashboardActivity extends AppCompatActivity {
+    private TextView tvWelcomeUser, tvActiveRepairTitle, tvActiveRepairStatus;
+    private Button btnLogout;
+    private DatabaseHelper db;
+
+    @Override protected void onCreate(Bundle state) {
+        super.onCreate(state); setContentView(R.layout.activity_customer_dashboard);
+        SharedPreferences prefs = getSharedPreferences("TechFixPrefs", Context.MODE_PRIVATE);
+        tvWelcomeUser = findViewById(R.id.tvWelcomeUser); tvWelcomeUser.setText("Welcome, " + prefs.getString("userName", "Customer") + "!");
+        btnLogout = findViewById(R.id.btnLogout); db = new DatabaseHelper(this);
+        tvActiveRepairTitle = findViewById(R.id.tvActiveRepairTitle); tvActiveRepairStatus = findViewById(R.id.tvActiveRepairStatus);
+        btnLogout.setOnClickListener(v -> { prefs.edit().clear().apply(); startActivity(new Intent(this, LoginActivity.class)); finish(); });
+        findViewById(R.id.btnCustomerTrackRepairs).setOnClickListener(v -> startActivity(new Intent(this, RepairHistoryActivity.class)));
+        findViewById(R.id.btnCustomerGallery).setOnClickListener(v -> startActivity(new Intent(this, GalleryActivity.class)));
+        findViewById(R.id.btnViewTechnicians).setOnClickListener(v -> startActivity(new Intent(this, BranchesActivity.class)));
+        findViewById(R.id.btnCustomerNearestBranch).setOnClickListener(v -> findNearestBranch());
+        CustomerNavigation.bind(this, "profile");
+        loadCurrentRepair();
+    }
+
+    private void loadCurrentRepair() { int userId = getSharedPreferences("TechFixPrefs", 0).getInt("userId", -1); new Thread(() -> { List<Appointment> list = db.getAppointmentsForUser(userId); runOnUiThread(() -> { if (list.isEmpty()) { tvActiveRepairTitle.setText("No active repair"); tvActiveRepairStatus.setText("Book a repair to see its status here."); } else { Appointment a=list.get(0); tvActiveRepairTitle.setText(a.getDeviceModel()==null||a.getDeviceModel().isEmpty()?a.getDeviceCategory()+" repair":a.getDeviceModel()); String note=a.getAssignmentNote(); tvActiveRepairStatus.setText("Assigned to "+a.getBranchName()+" ("+a.getStatus()+")"+(note==null||note.isEmpty()?"":"\n"+note)); } }); }).start(); }
+    private void findNearestBranch() {
+        BranchLocationHelper.findNearest(this, branchName ->
+                android.widget.Toast.makeText(this, "Nearest branch: " + branchName,
+                        android.widget.Toast.LENGTH_LONG).show());
+    }
+
+    @Override public void onRequestPermissionsResult(int requestCode,
+                                                     String[] permissions,
+                                                     int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        BranchLocationHelper.handlePermissionResult(this, requestCode, grantResults,
+                branchName -> android.widget.Toast.makeText(this,
+                        "Nearest branch: " + branchName,
+                        android.widget.Toast.LENGTH_LONG).show());
+    }
+}
+
+===== app/src/main/res/layout/activity_home.xml =====
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="@color/tech_bg">
+
+    <ScrollView android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1" android:fillViewport="true" android:clipToPadding="false">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:background="@drawable/bg_home_hero"
+            android:paddingStart="20dp" android:paddingEnd="20dp" android:paddingBottom="24dp">
+
+            <!-- Home menu / brand -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:gravity="center_vertical" android:paddingTop="14dp" android:paddingBottom="6dp">
+                <ImageButton
+                    android:id="@+id/btnHomeMenu"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Open account menu"
+                    android:padding="10dp"
+                    android:src="@drawable/ic_menu" />
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp" android:layout_weight="1"
+                    android:text="TECHFIX" android:textColor="@color/tech_text_main" android:textSize="14sp"
+                    android:textStyle="bold" android:letterSpacing="0.14" />
+                <TextView
+                    android:id="@+id/tvHomeCustomerName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/bg_home_tile"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:maxWidth="130dp"
+                    android:maxLines="1"
+                    android:paddingHorizontal="10dp"
+                    android:textColor="@color/tech_accent"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:gravity="center" android:paddingTop="12dp" android:paddingBottom="30dp">
+                <ImageView android:id="@+id/imgLogo" android:layout_width="112dp" android:layout_height="112dp"
+                    android:contentDescription="TechFix company logo" android:src="@drawable/techfix_logo" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp" android:gravity="center" android:text="Expert care for\nevery device."
+                    android:textColor="@color/tech_text_main" android:textSize="34sp" android:textStyle="bold"
+                    android:lineSpacingMultiplier="0.92" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp" android:gravity="center"
+                    android:text="Fast, reliable repairs backed by people you can trust."
+                    android:textColor="@color/tech_text_sub" android:textSize="14sp" />
+                <Button android:id="@+id/btnBookRepair" android:layout_width="match_parent" android:layout_height="54dp"
+                    android:layout_marginTop="22dp" android:text="Book a Repair" android:textSize="15sp"
+                    android:background="@drawable/bg_home_cta" app:icon="@drawable/ic_repair"
+                    app:iconGravity="textStart" app:iconPadding="10dp" />
+            </LinearLayout>
+
+            <!-- How It Works -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/homeHowItWorksCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="@color/tech_surface"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="3dp"
+                app:strokeColor="@color/tech_outline_soft"
+                app:strokeWidth="1dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="18dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="How It Works" android:textColor="@color/tech_accent" android:textSize="20sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="From booking to back in your hands" android:textColor="@color/tech_text_sub" android:textSize="12sp" />
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:orientation="horizontal" android:gravity="center">
+                        <LinearLayout android:id="@+id/homeHowItWorksBook" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:clickable="true" android:focusable="true">
+                            <ImageView android:id="@+id/homeHowItWorksBookIcon" android:layout_width="38dp" android:layout_height="38dp" android:padding="9dp" android:background="@drawable/bg_home_cta" android:src="@drawable/ic_book" app:tint="@color/tech_accent" android:contentDescription="Book" />
+                            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:gravity="center" android:text="Book" android:textColor="@color/tech_text_main" android:textSize="12sp" />
+                        </LinearLayout>
+                        <TextView android:layout_width="14dp" android:layout_height="38dp" android:gravity="center" android:text="â€”" android:textColor="@color/tech_text_secondary" />
+                        <LinearLayout android:id="@+id/homeHowItWorksDiagnose" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:clickable="true" android:focusable="true">
+                            <ImageView android:id="@+id/homeHowItWorksDiagnoseIcon" android:layout_width="38dp" android:layout_height="38dp" android:padding="9dp" android:background="@drawable/bg_home_tile" android:src="@drawable/ic_computer" app:tint="@color/tech_accent" android:contentDescription="Diagnose" />
+                            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:gravity="center" android:text="Diagnose" android:textColor="@color/tech_text_main" android:textSize="12sp" />
+                        </LinearLayout>
+                        <TextView android:layout_width="14dp" android:layout_height="38dp" android:gravity="center" android:text="â€”" android:textColor="@color/tech_text_secondary" />
+                        <LinearLayout android:id="@+id/homeHowItWorksRepair" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:clickable="true" android:focusable="true">
+                            <ImageView android:id="@+id/homeHowItWorksRepairIcon" android:layout_width="38dp" android:layout_height="38dp" android:padding="9dp" android:background="@drawable/bg_home_tile" android:src="@drawable/ic_repair" app:tint="@color/tech_accent" android:contentDescription="Repair" />
+                            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:gravity="center" android:text="Repair" android:textColor="@color/tech_text_main" android:textSize="12sp" />
+                        </LinearLayout>
+                        <TextView android:layout_width="14dp" android:layout_height="38dp" android:gravity="center" android:text="â€”" android:textColor="@color/tech_text_secondary" />
+                        <LinearLayout android:id="@+id/homeHowItWorksTrack" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:clickable="true" android:focusable="true">
+                            <ImageView android:id="@+id/homeHowItWorksTrackIcon" android:layout_width="38dp" android:layout_height="38dp" android:padding="9dp" android:background="@drawable/bg_home_tile" android:src="@drawable/ic_track" app:tint="@color/tech_accent" android:contentDescription="Track" />
+                            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:gravity="center" android:text="Track" android:textColor="@color/tech_text_main" android:textSize="12sp" />
+                        </LinearLayout>
+                    </LinearLayout>
+                    <TextView android:id="@+id/homeHowItWorksDescription" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:padding="12dp" android:textColor="@color/tech_text_secondary" android:textSize="13sp" android:visibility="gone" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Our Services -->            <com.google.android.material.card.MaterialCardView android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="@color/tech_surface" app:cardCornerRadius="20dp" app:cardElevation="0dp"
+                app:strokeColor="@color/tech_outline_soft" app:strokeWidth="1dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="18dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Our Services" android:textColor="@color/tech_accent" android:textSize="20sp" android:textStyle="bold" />
+                    <GridLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="14dp" android:columnCount="2" android:useDefaultMargins="false">
+                        <LinearLayout android:layout_width="0dp" android:layout_height="88dp" android:layout_columnWeight="1" android:layout_marginEnd="6dp" android:layout_marginBottom="6dp" android:background="@drawable/bg_home_tile" android:gravity="center_vertical" android:orientation="vertical" android:padding="14dp">
+                            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_repair" app:tint="@color/tech_accent" android:contentDescription="Hardware repair" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Hardware Repair" android:textColor="@color/tech_text_main" android:textSize="13sp" android:textStyle="bold" />
+                        </LinearLayout>
+                        <LinearLayout android:layout_width="0dp" android:layout_height="88dp" android:layout_columnWeight="1" android:layout_marginStart="6dp" android:layout_marginBottom="6dp" android:background="@drawable/bg_home_tile" android:gravity="center_vertical" android:orientation="vertical" android:padding="14dp">
+                            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_settings" app:tint="@color/tech_accent" android:contentDescription="OS installation" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="OS Installation" android:textColor="@color/tech_text_main" android:textSize="13sp" android:textStyle="bold" />
+                        </LinearLayout>
+                        <LinearLayout android:layout_width="0dp" android:layout_height="88dp" android:layout_columnWeight="1" android:layout_marginEnd="6dp" android:layout_marginTop="6dp" android:background="@drawable/bg_home_tile" android:gravity="center_vertical" android:orientation="vertical" android:padding="14dp">
+                            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_computer" app:tint="@color/tech_accent" android:contentDescription="Custom PC builds" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Custom PC Builds" android:textColor="@color/tech_text_main" android:textSize="13sp" android:textStyle="bold" />
+                        </LinearLayout>
+                        <LinearLayout android:layout_width="0dp" android:layout_height="88dp" android:layout_columnWeight="1" android:layout_marginStart="6dp" android:layout_marginTop="6dp" android:background="@drawable/bg_home_tile" android:gravity="center_vertical" android:orientation="vertical" android:padding="14dp">
+                            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_track" app:tint="@color/tech_accent" android:contentDescription="Troubleshooting" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Troubleshooting" android:textColor="@color/tech_text_main" android:textSize="13sp" android:textStyle="bold" />
+                        </LinearLayout>
+                    </GridLayout>
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btnHomeViewServices" android:layout_width="match_parent" android:layout_height="50dp" android:layout_marginTop="14dp" android:text="View All Services" android:textColor="@color/tech_white" app:backgroundTint="@color/tech_primary" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Our Locations -->
+            <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content"
+                app:cardBackgroundColor="@color/tech_surface" app:cardCornerRadius="20dp" app:strokeColor="@color/tech_outline_soft" app:strokeWidth="1dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="18dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical">
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Our Locations" android:textColor="@color/tech_accent" android:textSize="20sp" android:textStyle="bold" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="28dp" android:background="@drawable/bg_open_chip" android:gravity="center" android:paddingHorizontal="10dp" android:text="â—  Open now" android:textColor="@color/tech_success" android:textSize="11sp" android:textStyle="bold" />
+                    </LinearLayout>
+                    <com.example.techfix.views.OfflineBranchMapView android:id="@+id/branchMap" android:layout_width="match_parent" android:layout_height="180dp" android:layout_marginTop="14dp" />
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btnNearestBranch" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Find Nearest Branch" android:layout_marginTop="10dp" app:backgroundTint="@color/tech_button_tint" />
+                    <LinearLayout android:visibility="gone" android:layout_width="match_parent" android:layout_height="112dp" android:layout_marginTop="14dp" android:background="@drawable/bg_map_thumb" android:gravity="center_vertical" android:padding="14dp">
+                        <FrameLayout android:layout_width="82dp" android:layout_height="82dp" android:background="@color/tech_map_surface">
+                            <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_gravity="center" android:background="@color/tech_map_line" android:rotation="-18" />
+                            <View android:layout_width="1dp" android:layout_height="match_parent" android:layout_gravity="center" android:background="@color/tech_map_line" android:rotation="28" />
+                            <ImageView android:layout_width="34dp" android:layout_height="34dp" android:layout_gravity="center" android:padding="5dp" android:src="@drawable/ic_location" app:tint="@color/tech_accent" android:contentDescription="Map location pin" />
+                        </FrameLayout>
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="14dp" android:orientation="vertical">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/colombo_branch_name" android:textColor="@color/tech_text_main" android:textSize="14sp" android:textStyle="bold" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="@string/colombo_branch_address" android:textColor="@color/tech_text_sub" android:textSize="12sp" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="9dp" android:text="@string/galle_branch_name" android:textColor="@color/tech_text_primary" android:textSize="12sp" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="@string/galle_branch_address" android:textColor="@color/tech_text_sub" android:textSize="11sp" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Shared customer navigation: Home remains the same landing page after login. -->
+    <include layout="@layout/customer_bottom_nav" />
+</LinearLayout>
+
+===== app/src/main/res/layout/activity_customer_dashboard.xml =====
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/tech_bg_dark">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:clipToPadding="false">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="24dp"
+            android:paddingTop="24dp"
+            android:paddingEnd="24dp"
+            android:paddingBottom="20dp">
+
+    <!-- Header Section -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="24dp">
+
+        <TextView
+            android:id="@+id/tvWelcomeUser"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/welcome_customer"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/tech_white" />
+
+        <Button
+            android:id="@+id/btnLogout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/logout"
+            android:textSize="12sp"
+            android:minHeight="40dp"
+            android:backgroundTint="@color/tech_button_tint" />
+    </LinearLayout>
+
+    <!-- Quick Status Card (Tracks active repair progress) -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/current_repair_status"
+        android:textColor="@color/tech_text_secondary"
+        android:textSize="14sp"
+        android:layout_marginBottom="8dp"/>
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"
+        app:cardBackgroundColor="@color/tech_surface"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="0dp"
+        app:strokeColor="@color/tech_accent"
+        app:strokeWidth="1dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+            <TextView
+                android:id="@+id/tvActiveRepairTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/asus_tuf_gaming_a15_screen_replacement"
+                android:textColor="@color/tech_white"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_marginBottom="4dp"/>
+            <TextView
+                android:id="@+id/tvActiveRepairStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/status_assigned_to_colombo_branch_in_progress"
+                android:textColor="@color/tech_accent"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        app:cardBackgroundColor="@color/tech_surface"
+        app:cardCornerRadius="8dp"
+        app:strokeColor="#665FD4E3"
+        app:strokeWidth="1dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="18dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Our Locations"
+                android:textColor="@color/tech_accent"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+            <com.example.techfix.views.OfflineBranchMapView
+                android:id="@+id/customerBranchMap"
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:layout_marginTop="14dp" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCustomerNearestBranch"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="10dp"
+                android:text="Find Nearest Branch"
+                android:textColor="@color/tech_white"
+                app:backgroundTint="@color/tech_button_tint" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnViewTechnicians"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="10dp"
+                android:text="View Technicians"
+                android:textColor="@color/tech_white"
+                app:backgroundTint="@color/tech_primary" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnCustomerTrackRepairs"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_marginTop="2dp"
+        android:text="Track Repairs / Repair History"
+        android:textColor="@color/tech_white"
+        app:backgroundTint="@color/tech_button_tint"
+        app:icon="@drawable/ic_track"
+        app:iconTint="@color/tech_white" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnCustomerGallery"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_marginTop="10dp"
+        android:text="Repair Gallery"
+        android:textColor="@color/tech_white"
+        app:backgroundTint="@color/tech_primary" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <include layout="@layout/customer_bottom_nav" />
+
+</LinearLayout>
+
+===== app/src/main/java/com/example/techfix/activities/RepairHistoryActivity.java =====
+package com.example.techfix.activities;
+import android.app.*; import android.content.*; import android.os.*; import android.view.*; import android.widget.*; import androidx.appcompat.app.AppCompatActivity; import androidx.lifecycle.*; import androidx.recyclerview.widget.*; import com.example.techfix.R; import com.example.techfix.adapters.RepairJobAdapter; import com.example.techfix.data.*; import java.util.*; import java.util.concurrent.*;
+public class RepairHistoryActivity extends AppCompatActivity { private RepairJobAdapter adapter; private TextView empty; public void onCreate(Bundle b){super.onCreate(b);setContentView(R.layout.activity_repair_history);empty=findViewById(R.id.tvHistoryEmpty);RecyclerView rv=findViewById(R.id.rvRepairHistory);rv.setLayoutManager(new LinearLayoutManager(this));adapter=new RepairJobAdapter(this::showDetails);rv.setAdapter(adapter);RepairViewModel model=new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication())).get(RepairViewModel.class);int userId=getSharedPreferences("TechFixPrefs",MODE_PRIVATE).getInt("userId",-1);model.jobsForUser(userId).observe(this,list->{adapter.submitList(list);empty.setVisibility(list==null||list.isEmpty()?View.VISIBLE:View.GONE);});findViewById(R.id.btnHistoryBack).setOnClickListener(v->finish());}
+ private void showDetails(RepairJob j){TechFixDatabase.get(this).repairDao();new Thread(()->{RepairDao dao=TechFixDatabase.get(this).repairDao();Device d=dao.device(j.deviceId);List<Part> parts=dao.parts(j.id);StringBuilder p=new StringBuilder();for(Part x:parts)p.append("\nâ€¢ ").append(x.name).append(" x").append(x.quantity);runOnUiThread(()->{LinearLayout box=new LinearLayout(this);box.setOrientation(LinearLayout.VERTICAL);box.setPadding(32,16,32,8);if(j.photoPath!=null){ImageView image=new ImageView(this);image.setImageURI(android.net.Uri.fromFile(new java.io.File(j.photoPath)));image.setAdjustViewBounds(true);box.addView(image);}TextView text=new TextView(this);text.setText("Device: "+(d==null?"":d.model)+"\nIssue: "+j.issueType+"\nStatus: "+j.status+"\nTechnician: "+(j.technicianAssigned==null?"Unassigned":j.technicianAssigned)+"\nParts used:"+(p.length()==0?" none":p));text.setTextColor(getColor(R.color.tech_text_primary));text.setPadding(0,16,0,8);box.addView(text);new AlertDialog.Builder(this).setTitle("Repair details").setView(box).setPositiveButton("Close",null).show();});}).start();}
+}
+
+===== app/src/main/java/com/example/techfix/database/DatabaseHelper.java =====
+package com.example.techfix.database;
+
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+
+import com.example.techfix.models.Appointment;
+import com.example.techfix.models.Branch;
+import com.example.techfix.models.RepairService;
+import com.example.techfix.models.SparePart;
+import com.example.techfix.models.User;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/** SQLite gateway. All public methods are synchronous; callers must use a worker thread. */
+public class DatabaseHelper extends SQLiteOpenHelper {
+    private static final String DATABASE_NAME = "techfix.db";
+    private static final int DATABASE_VERSION = 7;
+    public static final String TABLE_USERS = "users", TABLE_BRANCHES = "branches",
+            TABLE_SPARE_PARTS = "spare_parts", TABLE_APPOINTMENTS = "appointments",
+            TABLE_SERVICES = "services", TABLE_TECHNICIANS = "technicians",
+            TABLE_REPAIRED_SAMPLES = "repaired_samples";
+    public static final String KEY_ID = "id", KEY_USER_NAME = "name", KEY_USER_EMAIL = "email",
+            KEY_USER_PASSWORD = "password", KEY_USER_ROLE = "role";
+    public static final String KEY_BRANCH_LOCATION_NAME = "location_name", KEY_BRANCH_ADDRESS = "address",
+            KEY_BRANCH_LATITUDE = "latitude", KEY_BRANCH_LONGITUDE = "longitude";
+    public static final String KEY_PART_NAME = "part_name", KEY_PART_BRANCH_ID = "branch_id",
+            KEY_PART_STOCK_COUNT = "stock_count";
+    public static final String KEY_APP_USER_ID = "user_id", KEY_APP_BRANCH_ID = "branch_id",
+            KEY_APP_DEVICE_CATEGORY = "device_category", KEY_APP_DEVICE_MODEL = "device_model",
+            KEY_APP_ISSUE = "issue_description", KEY_APP_STATUS = "status", KEY_APP_PRICE = "price",
+            KEY_APP_SERVICE_ID = "service_id", KEY_APP_SERVICE_NAME = "service_name",
+            KEY_APP_PHOTO_PATH = "photo_path",
+            KEY_APP_TECHNICIAN_ID = "technician_id", KEY_APP_ASSIGNMENT_NOTE = "assignment_note";
+
+    public DatabaseHelper(Context context) { super(context, DATABASE_NAME, null, DATABASE_VERSION); }
+    @Override public void onConfigure(SQLiteDatabase db) { db.setForeignKeyConstraintsEnabled(true); }
+    @Override public void onCreate(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT NOT NULL,email TEXT UNIQUE NOT NULL,password TEXT NOT NULL,role TEXT NOT NULL)");
+        db.execSQL("CREATE TABLE branches (id INTEGER PRIMARY KEY AUTOINCREMENT,location_name TEXT NOT NULL,address TEXT NOT NULL,latitude REAL NOT NULL,longitude REAL NOT NULL)");
+        db.execSQL("CREATE TABLE spare_parts (id INTEGER PRIMARY KEY AUTOINCREMENT,part_name TEXT NOT NULL,branch_id INTEGER NOT NULL,stock_count INTEGER NOT NULL DEFAULT 0,UNIQUE(branch_id,part_name),FOREIGN KEY(branch_id) REFERENCES branches(id) ON DELETE CASCADE)");
+        db.execSQL("CREATE TABLE services (id INTEGER PRIMARY KEY AUTOINCREMENT,category TEXT NOT NULL,name TEXT NOT NULL,price REAL NOT NULL DEFAULT 0,image_uri TEXT)");
+        db.execSQL("CREATE TABLE technicians (id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT NOT NULL,branch_id INTEGER NOT NULL,active INTEGER NOT NULL DEFAULT 1,FOREIGN KEY(branch_id) REFERENCES branches(id) ON DELETE CASCADE)");
+        db.execSQL("CREATE TABLE appointments (id INTEGER PRIMARY KEY AUTOINCREMENT,user_id INTEGER NOT NULL,branch_id INTEGER NOT NULL,device_category TEXT NOT NULL,device_model TEXT,issue_description TEXT,service_id INTEGER,service_name TEXT,photo_path TEXT,price REAL NOT NULL DEFAULT 0,status TEXT NOT NULL DEFAULT 'Pending',technician_id INTEGER,assignment_note TEXT,FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,FOREIGN KEY(branch_id) REFERENCES branches(id) ON DELETE CASCADE,FOREIGN KEY(service_id) REFERENCES services(id) ON DELETE SET NULL,FOREIGN KEY(technician_id) REFERENCES technicians(id) ON DELETE SET NULL)");
+        db.execSQL("CREATE TABLE repaired_samples (id INTEGER PRIMARY KEY AUTOINCREMENT,category TEXT NOT NULL,description TEXT NOT NULL,image_uri TEXT,branch_id INTEGER,FOREIGN KEY(branch_id) REFERENCES branches(id) ON DELETE SET NULL)");
+        seedData(db);
+    }
+    @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        if (oldVersion < 2) {
+            addColumn(db, TABLE_APPOINTMENTS, KEY_APP_DEVICE_MODEL, "TEXT");
+            addColumn(db, TABLE_APPOINTMENTS, KEY_APP_ISSUE, "TEXT");
+            addColumn(db, TABLE_APPOINTMENTS, KEY_APP_PRICE, "REAL NOT NULL DEFAULT 0");
+            db.execSQL("CREATE TABLE IF NOT EXISTS services (id INTEGER PRIMARY KEY AUTOINCREMENT,category TEXT NOT NULL,name TEXT NOT NULL,price REAL NOT NULL DEFAULT 0,image_uri TEXT)");
+            db.execSQL("CREATE TABLE IF NOT EXISTS technicians (id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT NOT NULL,branch_id INTEGER NOT NULL,active INTEGER NOT NULL DEFAULT 1,FOREIGN KEY(branch_id) REFERENCES branches(id) ON DELETE CASCADE)");
+            seedServices(db);
+        }
+        if (oldVersion < 3) {
+            // Security migration: legacy admin accounts are manager accounts.
+            db.execSQL("UPDATE users SET role='manager' WHERE lower(role)='admin'");
+            seedManagerIfMissing(db);
+        }
+        if (oldVersion < 4) {
+            addColumn(db, TABLE_BRANCHES, KEY_BRANCH_ADDRESS, "TEXT NOT NULL DEFAULT ''");
+            updateBranch(db, "Colombo Branch", "Colombo Branch", "Majestic City, 10 Station Road, Colombo 00400", 6.893982, 79.854749);
+            updateBranch(db, "Galle Branch", "Galle Branch", "Galle Fort Clock Tower, Fort, Galle 80000", 6.032857, 80.214954);
+        }
+        if (oldVersion < 5) {
+            addColumn(db, TABLE_APPOINTMENTS, KEY_APP_TECHNICIAN_ID, "INTEGER");
+            addColumn(db, TABLE_APPOINTMENTS, KEY_APP_ASSIGNMENT_NOTE, "TEXT");
+            db.execSQL("CREATE TABLE IF NOT EXISTS repaired_samples (id INTEGER PRIMARY KEY AUTOINCREMENT,category TEXT NOT NULL,description TEXT NOT NULL,image_uri TEXT,branch_id INTEGER,FOREIGN KEY(branch_id) REFERENCES branches(id) ON DELETE SET NULL)");
+        }
+        if (oldVersion < 6) {
+            addColumn(db, TABLE_APPOINTMENTS, KEY_APP_SERVICE_ID, "INTEGER");
+            addColumn(db, TABLE_APPOINTMENTS, KEY_APP_SERVICE_NAME, "TEXT");
+        }
+        if (oldVersion < 7) {
+            addColumn(db, TABLE_APPOINTMENTS, KEY_APP_PHOTO_PATH, "TEXT");
+        }
+    }
+    private void seedManagerIfMissing(SQLiteDatabase db) {
+        try (Cursor c = db.rawQuery("SELECT id FROM users WHERE lower(role)='manager' LIMIT 1", null)) {
+            if (!c.moveToFirst()) {
+                // Bootstrap manager credentials for local/demo installation. Change before deployment.
+                addUser(db, "Admin Manager", "admin@techfix.com", "admin123", "manager");
+            }
+        }
+    }
+    @Override public void onOpen(SQLiteDatabase db) {
+        super.onOpen(db);
+        seedManagerIfMissing(db);
+    }
+    private void addColumn(SQLiteDatabase db, String table, String column, String type) { try { db.execSQL("ALTER TABLE " + table + " ADD COLUMN " + column + " " + type); } catch (Exception ignored) { } }
+    private void seedData(SQLiteDatabase db) {
+        ContentValues b = new ContentValues(); b.put(KEY_BRANCH_LOCATION_NAME,"Colombo Branch"); b.put(KEY_BRANCH_ADDRESS,"Majestic City, 10 Station Road, Colombo 00400"); b.put(KEY_BRANCH_LATITUDE,6.893982); b.put(KEY_BRANCH_LONGITUDE,79.854749); long c=db.insert(TABLE_BRANCHES,null,b);
+        b = new ContentValues(); b.put(KEY_BRANCH_LOCATION_NAME,"Galle Branch"); b.put(KEY_BRANCH_ADDRESS,"Galle Fort Clock Tower, Fort, Galle 80000"); b.put(KEY_BRANCH_LATITUDE,6.032857); b.put(KEY_BRANCH_LONGITUDE,80.214954); long g=db.insert(TABLE_BRANCHES,null,b);
+        addUser(db,"Admin Manager","admin@techfix.com","admin123","manager"); addUser(db,"John Doe","john@gmail.com","user123","customer");
+        addPart(db,"Mobile Screen",c,15); addPart(db,"Mobile Battery",c,20); addPart(db,"Laptop RAM",c,10); addPart(db,"Laptop Keyboard",c,8);
+        addPart(db,"Mobile Screen",g,12); addPart(db,"Mobile Battery",g,5); addPart(db,"Laptop RAM",g,7); addPart(db,"Laptop Keyboard",g,0);
+        addTech(db,"Nimal Perera",c); addTech(db,"Ayesha Silva",c); addTech(db,"Kasun Fernando",g); seedServices(db);
+    }
+    private void updateBranch(SQLiteDatabase db, String oldName, String name, String address, double latitude, double longitude) {
+        ContentValues values = new ContentValues();
+        values.put(KEY_BRANCH_LOCATION_NAME, name);
+        values.put(KEY_BRANCH_ADDRESS, address);
+        values.put(KEY_BRANCH_LATITUDE, latitude);
+        values.put(KEY_BRANCH_LONGITUDE, longitude);
+        db.update(TABLE_BRANCHES, values, KEY_BRANCH_LOCATION_NAME + "=?", new String[]{oldName});
+    }
+    private void addUser(SQLiteDatabase db,String n,String e,String p,String r){ContentValues v=new ContentValues();v.put(KEY_USER_NAME,n);v.put(KEY_USER_EMAIL,e);v.put(KEY_USER_PASSWORD,p);v.put(KEY_USER_ROLE,r);db.insert(TABLE_USERS,null,v);}
+    private void addPart(SQLiteDatabase db,String n,long branch,int stock){ContentValues v=new ContentValues();v.put(KEY_PART_NAME,n);v.put(KEY_PART_BRANCH_ID,branch);v.put(KEY_PART_STOCK_COUNT,stock);db.insert(TABLE_SPARE_PARTS,null,v);}
+    private void addTech(SQLiteDatabase db,String n,long branch){ContentValues v=new ContentValues();v.put("name",n);v.put("branch_id",branch);v.put("active",1);db.insert(TABLE_TECHNICIANS,null,v);}
+    private void seedServices(SQLiteDatabase db){ addService(db,"Mobile","Screen Replacement",4500,"android.resource://com.example.techfix/drawable/techfix_logo"); addService(db,"Mobile","Battery Replacement",2800,"android.resource://com.example.techfix/drawable/techfix_logo"); addService(db,"Laptop","Keyboard Replacement",6500,"android.resource://com.example.techfix/drawable/techfix_logo"); addService(db,"Laptop","SSD Upgrade",12000,"android.resource://com.example.techfix/drawable/techfix_logo"); }
+    private void addService(SQLiteDatabase db,String c,String n,double p,String i){ContentValues v=new ContentValues();v.put("category",c);v.put("name",n);v.put("price",p);v.put("image_uri",i);db.insert(TABLE_SERVICES,null,v);}
+
+    public boolean registerUser(User u){ContentValues v=new ContentValues();v.put(KEY_USER_NAME,u.getName());v.put(KEY_USER_EMAIL,u.getEmail());v.put(KEY_USER_PASSWORD,u.getPassword());v.put(KEY_USER_ROLE,u.getRole());return getWritableDatabase().insert(TABLE_USERS,null,v)!=-1;}
+    public User authenticateUser(String email,String password){try(Cursor c=getReadableDatabase().query(TABLE_USERS,null,"email=? AND password=?",new String[]{email,password},null,null,null)){if(c.moveToFirst()){User u=new User();u.setId(c.getInt(c.getColumnIndexOrThrow("id")));u.setName(c.getString(c.getColumnIndexOrThrow("name")));u.setEmail(c.getString(c.getColumnIndexOrThrow("email")));u.setPassword(c.getString(c.getColumnIndexOrThrow("password")));u.setRole(c.getString(c.getColumnIndexOrThrow("role")));return u;}}return null;}
+    public boolean isEmailExists(String email){try(Cursor c=getReadableDatabase().query(TABLE_USERS,new String[]{"id"},"email=?",new String[]{email},null,null,null)){return c.moveToFirst();}}
+    public boolean createStaffAccount(String username,String password,String role){if(!"manager".equalsIgnoreCase(role)&&!"staff".equalsIgnoreCase(role))return false;if(username==null||password==null||username.trim().isEmpty()||password.length()<6||isEmailExists(username.trim()))return false;ContentValues v=new ContentValues();v.put(KEY_USER_NAME,username.trim());v.put(KEY_USER_EMAIL,username.trim());v.put(KEY_USER_PASSWORD,password);v.put(KEY_USER_ROLE,role.toLowerCase(java.util.Locale.US));return getWritableDatabase().insert(TABLE_USERS,null,v)!=-1;}
+    public List<Branch> getAllBranches(){List<Branch> out=new ArrayList<>();try(Cursor c=getReadableDatabase().rawQuery("SELECT * FROM branches ORDER BY location_name",null)){while(c.moveToNext()){out.add(new Branch(c.getInt(c.getColumnIndexOrThrow("id")),c.getString(c.getColumnIndexOrThrow("location_name")),c.getString(c.getColumnIndexOrThrow("address")),c.getDouble(c.getColumnIndexOrThrow("latitude")),c.getDouble(c.getColumnIndexOrThrow("longitude"))));}}return out;}
+    public List<String> getActiveTechnicians(int branchId){List<String> out=new ArrayList<>();try(Cursor c=getReadableDatabase().query(TABLE_TECHNICIANS,new String[]{"name"},"branch_id=? AND active=1",new String[]{String.valueOf(branchId)},null,null,"name")){while(c.moveToNext())out.add(c.getString(0));}return out;}
+    public List<com.example.techfix.models.Technician> getTechnicians(int branchId){List<com.example.techfix.models.Technician> out=new ArrayList<>();try(Cursor c=getReadableDatabase().query(TABLE_TECHNICIANS,null,"branch_id=?",new String[]{String.valueOf(branchId)},null,null,"name")){while(c.moveToNext())out.add(new com.example.techfix.models.Technician(c.getInt(c.getColumnIndexOrThrow("id")),c.getString(c.getColumnIndexOrThrow("name")),branchId,c.getInt(c.getColumnIndexOrThrow("active"))==1));}return out;}
+    public String getAnyActiveTechnician(int branchId){List<String> names=getActiveTechnicians(branchId);return names.isEmpty()?null:names.get(0);}
+    public List<SparePart> getSparePartsForBranch(int branchId){List<SparePart> out=new ArrayList<>();try(Cursor c=getReadableDatabase().query(TABLE_SPARE_PARTS,null,"branch_id=?",new String[]{String.valueOf(branchId)},null,null,"part_name")){while(c.moveToNext()){SparePart p=new SparePart(c.getInt(c.getColumnIndexOrThrow("id")),c.getString(c.getColumnIndexOrThrow("part_name")),branchId,c.getInt(c.getColumnIndexOrThrow("stock_count")));out.add(p);}}return out;}
+    public boolean updateSparePartStock(int branchId,String part,int stock){ContentValues v=new ContentValues();v.put("stock_count",Math.max(0,stock));return getWritableDatabase().update(TABLE_SPARE_PARTS,v,"branch_id=? AND part_name=?",new String[]{String.valueOf(branchId),part})>0;}
+    public int getSparePartStock(int branchId,String part){try(Cursor c=getReadableDatabase().query(TABLE_SPARE_PARTS,new String[]{"stock_count"},"branch_id=? AND part_name=?",new String[]{String.valueOf(branchId),part},null,null,null)){return c.moveToFirst()?c.getInt(0):0;}}
+    public long addAppointment(Appointment a){ContentValues v=new ContentValues();v.put("user_id",a.getUserId());v.put("branch_id",a.getBranchId());v.put("device_category",a.getDeviceCategory());v.put("device_model",a.getDeviceModel());v.put("issue_description",a.getIssueDescription());if(a.getServiceId()>0)v.put("service_id",a.getServiceId());v.put("service_name",a.getServiceName());if(a.getPhotoPath()!=null)v.put("photo_path",a.getPhotoPath());v.put("status",a.getStatus());v.put("price",a.getPrice());if(a.getTechnicianName()!=null){int technicianId=findTechnicianId(a.getBranchId(),a.getTechnicianName());if(technicianId>0)v.put("technician_id",technicianId);}if(a.getAssignmentNote()!=null)v.put("assignment_note",a.getAssignmentNote());return getWritableDatabase().insert(TABLE_APPOINTMENTS,null,v);}
+    private int findTechnicianId(int branchId,String name){try(Cursor c=getReadableDatabase().query(TABLE_TECHNICIANS,new String[]{"id"},"branch_id=? AND name=? AND active=1",new String[]{String.valueOf(branchId),name},null,null,null)){return c.moveToFirst()?c.getInt(0):0;}}
+    private List<Appointment> appointments(String where,String[] args){List<Appointment> out=new ArrayList<>();String q="SELECT a.*,b.location_name,u.name,t.name AS technician_name FROM appointments a JOIN branches b ON a.branch_id=b.id JOIN users u ON a.user_id=u.id LEFT JOIN technicians t ON a.technician_id=t.id"+(where==null?"":" WHERE "+where)+" ORDER BY a.id DESC";try(Cursor c=getReadableDatabase().rawQuery(q,args)){while(c.moveToNext()){Appointment a=new Appointment();a.setId(c.getInt(c.getColumnIndexOrThrow("id")));a.setUserId(c.getInt(c.getColumnIndexOrThrow("user_id")));a.setBranchId(c.getInt(c.getColumnIndexOrThrow("branch_id")));a.setDeviceCategory(c.getString(c.getColumnIndexOrThrow("device_category")));a.setDeviceModel(c.getString(c.getColumnIndexOrThrow("device_model")));a.setIssueDescription(c.getString(c.getColumnIndexOrThrow("issue_description")));a.setServiceId(c.getInt(c.getColumnIndexOrThrow("service_id")));a.setServiceName(c.getString(c.getColumnIndexOrThrow("service_name")));a.setPhotoPath(c.getString(c.getColumnIndexOrThrow("photo_path")));a.setPrice(c.getDouble(c.getColumnIndexOrThrow("price")));a.setStatus(c.getString(c.getColumnIndexOrThrow("status")));a.setBranchName(c.getString(c.getColumnIndexOrThrow("location_name")));a.setUserName(c.getString(c.getColumnIndexOrThrow("name")));a.setTechnicianName(c.getString(c.getColumnIndexOrThrow("technician_name")));a.setAssignmentNote(c.getString(c.getColumnIndexOrThrow("assignment_note")));out.add(a);}}return out;}
+    public List<Appointment> getAppointmentsForUser(int id){return appointments("a.user_id=?",new String[]{String.valueOf(id)});}
+    public List<Appointment> getAllAppointments(){return appointments(null,null);}
+    public boolean updateAppointmentStatus(int id,String status){ContentValues v=new ContentValues();v.put("status",status);return getWritableDatabase().update(TABLE_APPOINTMENTS,v,"id=?",new String[]{String.valueOf(id)})>0;}
+    public List<RepairService> getServices(String search){return getServices(search,"All");}
+    public List<RepairService> getAllServices(){return getServices("","All");}
+    public List<RepairService> getServices(String search,String category){List<RepairService> out=new ArrayList<>();String s=search==null?"":search.trim();String cat=category==null?"All":category.trim();String where="(name LIKE ? OR category LIKE ?)";List<String> args=new ArrayList<>();args.add("%"+s+"%");args.add("%"+s+"%");if(!cat.isEmpty()&&!"All".equalsIgnoreCase(cat)){where+=" AND lower(category)=lower(?)";args.add(cat);}try(Cursor c=getReadableDatabase().query(TABLE_SERVICES,null,where,args.toArray(new String[0]),null,null,"category,name")){while(c.moveToNext())out.add(new RepairService(c.getInt(0),c.getString(1),c.getString(2),c.getDouble(3),c.getString(4)));}return out;}
+    public boolean saveService(RepairService service){ContentValues v=new ContentValues();v.put("category",service.getCategory());v.put("name",service.getName());v.put("price",service.getPrice());v.put("image_uri",service.getImageUri());if(service.getId()>0)return getWritableDatabase().update(TABLE_SERVICES,v,"id=?",new String[]{String.valueOf(service.getId())})>0;return getWritableDatabase().insert(TABLE_SERVICES,null,v)>0;}
+    public boolean deleteService(int id){return getWritableDatabase().delete(TABLE_SERVICES,"id=?",new String[]{String.valueOf(id)})>0;}
+    public boolean addSparePart(int branchId,String name,int quantity){if(name==null||name.trim().isEmpty()||quantity<0)return false;ContentValues v=new ContentValues();v.put("branch_id",branchId);v.put("part_name",name.trim());v.put("stock_count",quantity);return getWritableDatabase().insertWithOnConflict(TABLE_SPARE_PARTS,null,v,SQLiteDatabase.CONFLICT_REPLACE)>0;}
+    public boolean deleteSparePart(int id){return getWritableDatabase().delete(TABLE_SPARE_PARTS,"id=?",new String[]{String.valueOf(id)})>0;}
+    public boolean addTechnician(String name,int branchId){if(name==null||name.trim().isEmpty())return false;ContentValues v=new ContentValues();v.put("name",name.trim());v.put("branch_id",branchId);v.put("active",1);return getWritableDatabase().insert(TABLE_TECHNICIANS,null,v)>0;}
+    public boolean setTechnicianActive(int id,boolean active){ContentValues v=new ContentValues();v.put("active",active?1:0);return getWritableDatabase().update(TABLE_TECHNICIANS,v,"id=?",new String[]{String.valueOf(id)})>0;}
+    public boolean addRepairedSample(String category,String description,String imageUri,int branchId){ContentValues v=new ContentValues();v.put("category",category);v.put("description",description);v.put("image_uri",imageUri);if(branchId>0)v.put("branch_id",branchId);return getWritableDatabase().insert(TABLE_REPAIRED_SAMPLES,null,v)>0;}
+    public List<com.example.techfix.models.RepairedSample> getRepairedSamples(){List<com.example.techfix.models.RepairedSample> out=new ArrayList<>();String q="SELECT s.*,b.location_name AS branch_name FROM repaired_samples s LEFT JOIN branches b ON s.branch_id=b.id ORDER BY s.id DESC";try(Cursor c=getReadableDatabase().rawQuery(q,null)){while(c.moveToNext())out.add(new com.example.techfix.models.RepairedSample(c.getInt(c.getColumnIndexOrThrow("id")),c.getString(c.getColumnIndexOrThrow("category")),c.getString(c.getColumnIndexOrThrow("description")),c.getString(c.getColumnIndexOrThrow("image_uri")),c.getString(c.getColumnIndexOrThrow("branch_name"))));}return out;}
+}
+
+===== app/src/main/java/com/example/techfix/utils/BranchRouter.java =====
+package com.example.techfix.utils;
+
+import android.content.Context;
+import com.example.techfix.database.DatabaseHelper;
+import com.example.techfix.models.Branch;
+import java.util.*;
+
+public class BranchRouter {
+    public static class RouteResult {
+        public Branch nearest;
+        public Branch eligible;
+        public Branch fallback;
+        public String requiredPart;
+        public String reason;
+    }
+
+    public static RouteResult evaluate(Context context, String category, double userLat, double userLng) {
+        DatabaseHelper db = new DatabaseHelper(context);
+        List<Branch> branches = db.getAllBranches();
+        String part = requiredPart(category);
+        branches.sort(Comparator.comparingDouble(b -> distance(userLat, userLng, b.getLatitude(), b.getLongitude())));
+        RouteResult result = new RouteResult(); result.requiredPart = part;
+        if (branches.isEmpty()) return result;
+        result.nearest = branches.get(0);
+        for (Branch branch : branches) {
+            boolean hasTech = !db.getActiveTechnicians(branch.getId()).isEmpty();
+            boolean hasPart = db.getSparePartStock(branch.getId(), part) > 0;
+            if (hasTech && hasPart) { result.eligible = branch; break; }
+        }
+        if (result.eligible != null && result.nearest != result.eligible) {
+            result.fallback = result.eligible;
+            boolean tech = !db.getActiveTechnicians(result.nearest.getId()).isEmpty();
+            boolean stock = db.getSparePartStock(result.nearest.getId(), part) > 0;
+            result.reason = !tech && !stock ? "technician availability and the required spare part: " + part + "" : (!tech ? "technician availability" : "the required spare part: " + part + "");
+        }
+        db.close(); return result;
+    }
+
+    public static String requiredPart(String category) {
+        if ("Mobile".equalsIgnoreCase(category)) return "Mobile Screen";
+        if ("Laptop".equalsIgnoreCase(category)) return "Laptop Keyboard";
+        return "Mobile Screen";
+    }
+    public static double distance(double lat1,double lon1,double lat2,double lon2){double r=6371, a=Math.sin(Math.toRadians(lat2-lat1)/2)*Math.sin(Math.toRadians(lat2-lat1)/2)+Math.cos(Math.toRadians(lat1))*Math.cos(Math.toRadians(lat2))*Math.sin(Math.toRadians(lon2-lon1)/2)*Math.sin(Math.toRadians(lon2-lon1)/2);return r*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
+    public static Branch routeToNearestAvailableBranch(Context context,String category,double lat,double lng){RouteResult r=evaluate(context,category,lat,lng);return r.eligible!=null?r.eligible:r.nearest;}
+}
+
+===== app/src/main/java/com/example/techfix/data/RepairViewModel.java =====
+package com.example.techfix.data;
+
+import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
+import java.util.List;
+
+public class RepairViewModel extends AndroidViewModel {
+    public RepairViewModel(android.app.Application application) { super(application); }
+
+    public LiveData<List<RepairJob>> jobsForUser(int userId) {
+        return TechFixDatabase.get(getApplication()).repairDao().jobsForUser(userId);
+    }
+}
+

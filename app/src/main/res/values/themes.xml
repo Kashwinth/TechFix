@@ -51,4 +51,17 @@
         <item name="boxCornerRadiusBottomStart">6dp</item>
         <item name="boxCornerRadiusBottomEnd">6dp</item>
     </style>
+    <style name="ThemeOverlay_TechFix_Dialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="colorPrimary">@color/tech_dialog_accent</item>
+        <item name="colorOnPrimary">@color/tech_dialog_text</item>
+        <item name="colorSurface">@color/tech_dialog_surface</item>
+        <item name="colorOnSurface">@color/tech_dialog_text</item>
+        <item name="colorSurfaceVariant">@color/tech_dialog_surface_high</item>
+        <item name="colorOnSurfaceVariant">@color/tech_dialog_text_secondary</item>
+        <item name="android:colorBackground">@color/tech_dialog_surface</item>
+        <item name="android:windowBackground">@color/tech_dialog_surface</item>
+        <item name="android:textColorPrimary">@color/tech_dialog_text</item>
+        <item name="android:textColorSecondary">@color/tech_dialog_text_secondary</item>
+    </style>
+
 </resources>

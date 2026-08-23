@@ -1,3 +1,84 @@
 package com.example.techfix.adapters;
-import android.view.*; import android.widget.ImageView; import android.widget.TextView; import androidx.annotation.*; import androidx.recyclerview.widget.*; import com.example.techfix.R; import com.example.techfix.data.RepairJob; import java.text.DateFormat; import java.util.*;
-public class RepairJobAdapter extends ListAdapter<RepairJob,RepairJobAdapter.Holder>{ public interface Click{void open(RepairJob j);} private final Click click; public RepairJobAdapter(Click c){super(new DiffUtil.ItemCallback<RepairJob>(){public boolean areItemsTheSame(@NonNull RepairJob a,@NonNull RepairJob b){return a.id==b.id;}public boolean areContentsTheSame(@NonNull RepairJob a,@NonNull RepairJob b){return a.id==b.id&&Objects.equals(a.status,b.status)&&Objects.equals(a.photoPath,b.photoPath)&&a.estimatedCost==b.estimatedCost;}});click=c;} public Holder onCreateViewHolder(ViewGroup p,int t){return new Holder(LayoutInflater.from(p.getContext()).inflate(R.layout.item_repair_job,p,false));} public void onBindViewHolder(Holder h,int pos){RepairJob j=getItem(pos);h.device.setText("Repair #"+j.id+"  |  Device #"+j.deviceId);h.status.setText(j.status.toUpperCase(Locale.US));h.issue.setText(j.issueType);h.meta.setText(String.format(Locale.US,"Estimated cost: LKR %.2f  |  %s\nTechnician: %s",j.estimatedCost,DateFormat.getDateInstance().format(new Date(j.createdDate)),j.technicianAssigned==null?"Not yet assigned":j.technicianAssigned));if(j.photoPath!=null){h.photo.setVisibility(View.VISIBLE);h.photo.setImageURI(android.net.Uri.fromFile(new java.io.File(j.photoPath)));}else h.photo.setVisibility(View.GONE);h.itemView.setOnClickListener(v->click.open(j));} static class Holder extends RecyclerView.ViewHolder{TextView device,status,issue,meta;ImageView photo;Holder(View v){super(v);device=v.findViewById(R.id.repairDevice);status=v.findViewById(R.id.repairStatus);issue=v.findViewById(R.id.repairIssue);meta=v.findViewById(R.id.repairMeta);photo=v.findViewById(R.id.repairPhoto);}}}
+
+import android.net.Uri;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.techfix.R;
+import com.example.techfix.models.Appointment;
+
+import java.io.File;
+import java.util.Locale;
+
+public class RepairJobAdapter extends ListAdapter<Appointment, RepairJobAdapter.Holder> {
+    public interface Click { void open(Appointment appointment); }
+
+    private final Click click;
+
+    public RepairJobAdapter(Click click) {
+        super(new DiffUtil.ItemCallback<Appointment>() {
+            @Override public boolean areItemsTheSame(@NonNull Appointment oldItem, @NonNull Appointment newItem) {
+                return oldItem.getId() == newItem.getId();
+            }
+
+            @Override public boolean areContentsTheSame(@NonNull Appointment oldItem, @NonNull Appointment newItem) {
+                return oldItem.getId() == newItem.getId()
+                        && equals(oldItem.getStatus(), newItem.getStatus())
+                        && equals(oldItem.getPhotoPath(), newItem.getPhotoPath())
+                        && oldItem.getPrice() == newItem.getPrice()
+                        && equals(oldItem.getTechnicianName(), newItem.getTechnicianName());
+            }
+
+            private boolean equals(Object first, Object second) {
+                return first == null ? second == null : first.equals(second);
+            }
+        });
+        this.click = click;
+    }
+
+    @NonNull @Override public Holder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        return new Holder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_repair_job, parent, false));
+    }
+
+    @Override public void onBindViewHolder(@NonNull Holder holder, int position) {
+        Appointment appointment = getItem(position);
+        String device = appointment.getDeviceModel();
+        holder.device.setText("Repair #" + appointment.getId() + "  |  " +
+                (device == null || device.isEmpty() ? appointment.getDeviceCategory() + " repair" : device));
+        holder.status.setText(appointment.getStatus().toUpperCase(Locale.US));
+        holder.issue.setText(appointment.getIssueDescription() == null ? "No issue description" : appointment.getIssueDescription());
+        holder.meta.setText(String.format(Locale.US, "Estimated cost: LKR %.2f\nBranch: %s\nTechnician: %s",
+                appointment.getPrice(), appointment.getBranchName(),
+                appointment.getTechnicianName() == null ? "Not yet assigned" : appointment.getTechnicianName()));
+        String photoPath = appointment.getPhotoPath();
+        if (photoPath != null && !photoPath.isEmpty() && new File(photoPath).exists()) {
+            holder.photo.setVisibility(View.VISIBLE);
+            holder.photo.setImageURI(Uri.fromFile(new File(photoPath)));
+        } else {
+            holder.photo.setVisibility(View.GONE);
+        }
+        holder.itemView.setOnClickListener(view -> click.open(appointment));
+    }
+
+    static class Holder extends RecyclerView.ViewHolder {
+        final TextView device, status, issue, meta;
+        final ImageView photo;
+
+        Holder(View view) {
+            super(view);
+            device = view.findViewById(R.id.repairDevice);
+            status = view.findViewById(R.id.repairStatus);
+            issue = view.findViewById(R.id.repairIssue);
+            meta = view.findViewById(R.id.repairMeta);
+            photo = view.findViewById(R.id.repairPhoto);
+        }
+    }
+}
